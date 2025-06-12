@@ -12,9 +12,7 @@ output_path="$current_dir/compile.output"
 status_file="/tmp/build_ae.flag"
 
 # Phase 0: Check script running status
-echo "--------------------"
-echo "Phase 0: Check script running status"
-echo "--------------------"
+echo "---------- Phase 0: Check script running status ----------"
 
 if [ -f "$status_file" ]; then
     if grep -q "running" "$status_file"; then
@@ -31,18 +29,14 @@ else
 fi
 
 # Phase 1: Configure hugepage on compute nodes
-echo "--------------------"
-echo "Phase 1: Configure hugepage on compute nodes"
-echo "--------------------"
+echo "---------- Phase 1: Configure hugepage on compute nodes ----------"
 for n in $compute_nodes; do
     echo "Configuring hugepage on compute node $n"
     ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=12768'; exit"
 done
 
 # Phase 2: Copy and compile code on compute nodes
-echo "--------------------"
-echo "Phase 2: Copy and compile code on compute nodes"
-echo "--------------------"
+echo "---------- Phase 2: Copy and compile code on compute nodes ----------"
 id=1
 for n in $compute_nodes; do
     echo "Copying and compiling code on compute node $n"
@@ -52,18 +46,14 @@ for n in $compute_nodes; do
 done
 
 # Phase 3: Configure hugepage on memory nodes
-echo "--------------------"
-echo "Phase 3: Configure hugepage on memory nodes"
-echo "--------------------"
+echo "---------- Phase 3: Configure hugepage on memory nodes ----------"
 for n in $memory_nodes; do
     echo "Configuring hugepage on memory node $n"
     ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=82768'; exit"
 done
 
 # Phase 4: Copy and compile code on memory nodes
-echo "--------------------"
-echo "Phase 4: Copy and compile code on memory nodes"
-echo "--------------------"
+echo "---------- Phase 4: Copy and compile code on memory nodes ----------"
 for n in $memory_nodes; do
     echo "Copying and compiling code on memory node $n"
     scp -r "$current_dir" skv-node$n:~/ > "$output_path" 2>&1
@@ -71,15 +61,11 @@ for n in $memory_nodes; do
 done
 
 # Phase 5: Build code on local node (node7)
-echo "--------------------"
-echo "Phase 5: Build code on local node (node7)"
-echo "--------------------"
+echo "---------- Phase 5: Build code on local node (node7) ----------"
 sudo sysctl -w vm.nr_hugepages=12768;
 python3 ./AE/default.py --node_id 0 && bash ./compile.sh > "$output_path" 2>&1
 
 # Final: Mark status as completed
 echo "completed" > "$status_file"
 
-echo "--------------------"
-echo "All phases completed. Output saved to $output_path"
-echo "--------------------"
+echo "---------- All phases completed. Output saved to $output_path ----------"

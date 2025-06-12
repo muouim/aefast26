@@ -3,7 +3,7 @@
 trap 'kill $(jobs -p)' SIGINT
 
 # Define the directory as a variable
-dm_tree_dir="~/aefast26/DMTree"
+dm_tree_dir="$HOME/aefast26/DMTree"
 
 workloads="ycsb-c insert-only update-only scan-only"
 threads="72 1 6 12 24 36 48 60"

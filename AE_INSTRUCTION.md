@@ -123,6 +123,10 @@ The resource usage evaluation results:
 ...
 ```
 
+如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行
+
+- 协程判定退出的时候，会存在一些卡住的情况？还是server掉了
+
 ### Overall system analysis (Exp#1~5 in our paper)
 
 #### Exp#1: Performance with YCSB core workloads (1 human minutes + ~ 20 compute-hours)

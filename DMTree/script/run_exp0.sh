@@ -3,12 +3,22 @@
 trap 'kill $(jobs -p)' SIGINT
 
 # Define the directory as a variable
-dm_tree_dir="~/aefast26/DMTree"
+dm_tree_dir="$HOME/aefast26/DMTree"
 
 workloads="ycsb-c insert-only update-only scan-only"
 threads="72"
 distribution="zipfian"
 node="6 5 4 2 1"
+memory_nodes="3"
+
+# The 'data' directory is used to store the experiment results.
+if [ ! -d "$dm_tree_dir/data" ]; then
+    mkdir -p "$dm_tree_dir/data"
+fi
+
+for n in $node $memory_nodes; do
+    ssh skv-node$n "mkdir -p $dm_tree_dir/data"
+done
 
 for dis in $distribution; do
     for thread in $threads; do
@@ -27,14 +37,14 @@ for dis in $distribution; do
             for n in $node; do
                 sleep 2
                 echo "Running ycsbc on compute node $n"
-                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_dmtree_$file_name-$dis-thread$thread-coro4.txt 2>&1 &; exit;"
+                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_dmtree_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
             done
             
             sleep 2
             echo "Running ycsbc on compute node 7"
             cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_dmtree_$file_name-$dis-thread$thread-coro4.txt 2>&1;
             
-            # Run kill_server.sh script on on memory nodes
+            # Run kill_server.sh script on memory nodes
             echo "Kill server process on memory nodes"
             ssh skv-node3 "/bin/bash -c 'cd $dm_tree_dir/script && bash kill_server.sh'; exit;"
             

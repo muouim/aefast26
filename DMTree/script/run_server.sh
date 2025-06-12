@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the DMTree directory as a variable
-dm_tree_dir="~/aefast26/DMTree"
+dm_tree_dir="$HOME/aefast26/DMTree"
 
 # Navigate to the build directory under DMTree
 cd $dm_tree_dir/build

@@ -126,10 +126,12 @@ static void mehcached_zipf_change_n(struct zipf_gen_state *state, uint64_t n) {
 
 static double mehcached_zeta(uint64_t last_n, double last_sum, uint64_t n,
                              double theta) {
+    // Given the parameters, the zeta value is fixed here. 
+    // To avoid time waste caused by redundant calculations, 
+    // the zeta value is provided based on the default configuration.
     if(last_n == 0 && last_sum == 0 && n == 1000000000 && theta == 0.99) {
         return double(23.6526470810390954113699990557506680488586425781250000000000000000);
     }
-    std::cout<<"cal "<<last_n<<" "<<last_sum<<" "<<n<<" "<<theta<<std::endl;
 
     if (last_n > n) {
         last_n = 0;
@@ -139,8 +141,6 @@ static double mehcached_zeta(uint64_t last_n, double last_sum, uint64_t n,
         last_sum += 1. / mehcached_pow_approx((double)last_n + 1., theta);
         last_n++;
     }
-    std::cout<<"final "<<last_sum<<std::endl;
-
     return last_sum;
 }
 

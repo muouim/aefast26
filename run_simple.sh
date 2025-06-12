@@ -8,9 +8,7 @@ status_file="/tmp/simple_exp.flag"
 output_path="$base_dir/simple.output"
 
 # Phase 0: Check script running status
-echo "--------------------"
-echo "Phase 0: Check script running status"
-echo "--------------------"
+echo "---------- Phase 0: Check script running status ----------"
 
 if [ -f "$status_file" ]; then
     if grep -q "running" "$status_file"; then
@@ -27,9 +25,7 @@ else
 fi
 
 # Phase 1: Run simple experiment for each baseline
-echo "--------------------"
-echo "Phase 1: Run simple experiment for each baseline"
-echo "--------------------"
+echo "---------- Phase 1: Run simple experiment for each baseline ----------"
 
 for project in $baselines; do
     echo "Running experiment for $project"
@@ -43,9 +39,7 @@ for project in $baselines; do
     fi
 done
 
-# Phase 2: Mark script as completed
+# Mark script as completed
 echo "completed" > "$status_file"
 
-echo "--------------------"
-echo "All phases completed. Output saved to $output_path"
-echo "--------------------"
+echo "---------- All phases completed. Output saved to $output_path ----------"
