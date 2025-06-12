@@ -6,8 +6,8 @@ trap 'kill $(jobs -p)' SIGINT
 dm_tree_dir="~/aefast26/DMTree"
 
 workloads="ycsb-c insert-only update-only scan-only"
-threads="72 1 6 12 24 36 48 60"
-distribution="zipfian uniform"
+threads="72"
+distribution="zipfian"
 node="6 5 4 2 1"
 
 for dis in $distribution; do
@@ -45,4 +45,7 @@ for dis in $distribution; do
     done
 done
 
-echo "All tasks are finished"
+echo "============================="
+echo "All DMTree tasks are finished"
+echo "All experiment results are saved in: $dm_tree_dir/data"
+echo "============================="

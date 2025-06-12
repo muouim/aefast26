@@ -8,7 +8,6 @@ using CacheSkipList = InlineSkipList<CacheEntryComparator>;
 // search cache
 void DMCache::search_cache(const Key& key, Record& inner_record, std::vector<Record>& path) {
 
-    // 查找时，是将remote_addr一块写到缓存中，如果缓存失效（缓存的叶子节点查找到了错误的节点，那么则进行远端节点的读取，再找不到，才进行完整索引的读取）
 	CacheSkipList::Iterator iter(skiplist);
 	CacheEntry e;
 

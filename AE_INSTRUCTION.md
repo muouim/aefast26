@@ -4,44 +4,45 @@ Here are the detailed instructions to perform the same experiments in our paper.
 
 ## Artifact claims
 
-We claim that the results might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect ELECT to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
+We claim that the results might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect DMTree to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
 
 ## Cluster setup
 
 * We require **six compute nodes** and **one memory node** in AE.
 * We provide a server cluster consisting of 7 nodes (skv-node1 to skv-node7) for reproducing the experiments in our paper. One node, `skv-node7`, will be made available as the jump host for accessing the cluster and as the main node for running the reproduction scripts. The AEC can submit their SSH public key via the following document: XXX. Once we have added the key to the server, node7 can be accessed using the following command:`ssh -P 6672 aefast26@222.195.68.87`.
-* We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted a document-based reservation system along with an exclusive access notification mechanism, ensuring that only one AEC can run experiments at any given time. Additionally, to avoid excessive redundant testing, we will indicate which experiments have already been executed and have results available. It will be up to the AEC to decide whether to rerun those parts.
+* We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted a document-based reservation system along with an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
+* Additionally, to avoid excessive redundant testing, we will indicate which experiments have already been executed and have results available. It will be up to the AEC to decide whether to rerun those parts.
 
-## Environment setup (5 human-minutes + ~ 40 compute-minutes)
+## Environment setup
 
-We provide scripts to set up the environment for the evaluation. The scripts are tested on Ubuntu 22.04 LTS. Note that the running time of the scripts depends on the node number, network bandwidth, and the performance of the cluster nodes.
+We provide scripts to set up the environment for the evaluation, including cloning the code repository and copying and compiling it across multiple cluster nodes. The scripts are tested on Ubuntu 20.04 LTS. 
 
-**Step 1:** Set up and check each node's user account and sudo password. We assume all the nodes have the same username and password. We use the user name and password to set up the running environment automatically. 
-
-**Step 2:** Set up the cluster node info in `scripts/settings.sh` on each node. Please fill in the following variables in the script. Note that we assume all the nodes have the same configurations (e.g., same user name, same path to the artifact folder, same network interface name, etc.).
-
-```shell
-NodesList=(10.31.0.185 10.31.0.181 10.31.0.182 10.31.0.184 10.31.0.188 10.31.0.180) # The IP addresses of the ELECT cluster nodes
-OSSServerNode="10.31.0.190" # The IP address of the OSS server node
-OSSServerPort=8000 # The port number of the OSS server node
-ClientNode="10.31.0.187" # The IP address of the client node (it can be the local node running the scripts)
-UserName="cc" # The user name of all the previous nodes
-sudoPasswd="" # The sudo password of all the previous nodes; we use this to install the required packages automatically; we assume all the nodes have the same user name. For the Chameleon cloud, please keep this as empty.
-PathToArtifact="/home/${UserName}/ELECT" # The path to the artifact folder; we assume all the nodes have the same path.
-PathToELECTExpDBBackup="/home/${UserName}/ELECTExpDBBackup" # The path to the backup folder for storing the loaded DB content; we assume all the nodes have the same path.
-PathToELECTLog="/home/${UserName}/ELECTLog" # The path to the log folder for storing the experiment logs; we assume all the nodes have the same path.
-PathToELECTResultSummary="/home/${UserName}/ELECTResules" # The path to the result summary folder for storing the final experiment results; we assume all the nodes have the same path. 
-```
-
-**Step 3:** Run the following script on one of the nodes (we suggest running on the client node). This script will install the required packages, set up the environment variables, and set up the SSH connection between the nodes.
+**Step 1:** Run the following script on `skv-node7`, including cloning the code repository and copying and compiling it across multiple cluster nodes.
 
 ```shell
-bash scripts/setup.sh full
+bash build_ae.sh
 ```
+
+To prevent repeated compilation and concurrent execution from disrupting the established environment, we have implemented a tracking and checking mechanism for the environment setup status when running the `build_ae.sh` script:
+
+- If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
+- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“.
+- If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
 
 ## Evaluations
 
-This section describes how to reproduce the evaluations in our paper. To simplify the reproduction process, we provide Ansible-based scripts to run all the experiments. The script will automatically run the experiments and generate the result logs. The scripts will take about 9~10 days to finish all the experiments. **We suggest running the scripts of Exp#0 first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update)**.
+This section describes how to reproduce the evaluations in our paper. To simplify the reproduction process, we provide Ansible-based scripts to run all major experiments. The script will automatically run the experiments and generate the result logs. The scripts will take about 9~10 days to finish all the experiments.
+
+- **We suggest running the scripts of Exp#0 first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update)**.
+
+### Note on the concurrency
+
+Th
+
+```shell
+cd scripts
+find . -type f -name "*.sh" -exec chmod +x {} \;
+```
 
 ### Note on the experiment scripts
 
@@ -84,18 +85,6 @@ Average: 1369.53, Min: 1355.774261, Max: 1383.292994
 Average: 1883.00, Min: 1823, Max: 1943
 ```
 
-* If the running round number is more than or equal to 5, the result will be output with the average and 95% student-t distribution confidence interval, as shown in the example below.
-
-```shell
-[Exp info] scheme: elect, workload: Write, KVNumber: 600000, OPNumber: 60000, KeySize: 24, ValueSize: 1000, ClientNumber: 16, ConsistencyLevel: ONE, ExtraFlag: 
-Throughput (unit: op/s): 
-Average: 31219.24; The 95% confidence interval: (30463.56, 31974.92)
-[READ] Average operation latency (unit: us):
-Average: 465.35; The 95% confidence interval: (452.85, 477.85)
-[READ] 99th percentile latency (unit: us):
-Average: 1623.00; The 95% confidence interval: (1553.32, 1692.68)
-```
-
 For the **storage overhead evaluation**, the result will be summarized based on the total, hot-tier, and cold-tier storage overhead. For example:
 
 ```shell
@@ -111,12 +100,12 @@ For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized
 
 #### Exp#0: Simple experiment (1 human-minutes + ~ 10 compute-hours)
 
-We provide this simple experiment to verify our main experimental results quickly: ELECT provides similar performance compared to Cassandra while significantly reducing hot-tier storage overhead. Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
+We provide this simple experiment to verify our main experimental results quickly: **TODO: DMTree provides XXX...... similar performance compared to Cassandra while significantly reducing hot-tier storage overhead.** Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
 
 You can run this simple experiment via the following command:
 
 ```shell
-bash scripts/exp/Exp0-simpleOverall.sh
+bash run_simple.sh
 ```
 
 The results will be output in the order shown below. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
