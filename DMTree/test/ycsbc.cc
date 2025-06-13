@@ -200,9 +200,6 @@ void coro_worker(CoroYield& yield, uint64_t operation_count,
 	if(finish_thread_count.load() == thread_count) {
 		need_stop = true;
 	}
-	while(!need_stop) {
-		yield(master);
-	}
 	yield(master);
 }
 
@@ -220,7 +217,7 @@ void coro_master(CoroYield& yield, int coro_cnt) {
 			yield(worker[wc[i].wr_id]);
 		}
 
-		if(!busy_waiting_queue.empty()) {
+		if(!busy_waiting_queue.empty() && !need_stop) {
 			auto next = busy_waiting_queue.front();
 			busy_waiting_queue.pop();
 			auto next_coro = next.first;
@@ -404,7 +401,7 @@ int main(const int argc, const char* argv[]) {
 
 	ProfilerStart("my.prof");
 
-	// perform transactions
+	// perform transactions, time between timer.begin() and timer.end().
 	num_threads = stoi(argv[1]);
 	actual_ops.clear();
 	utils::Timer<double> timer;
@@ -415,7 +412,6 @@ int main(const int argc, const char* argv[]) {
 		          tran_ops / config.ComputeNumber / num_threads, tran_ops));
 	}
 	assert((int)actual_ops.size() == num_threads);
-	dmtree->print_cache_info();
 
 	sum = 0;
 	for(auto& n : actual_ops) {
@@ -423,10 +419,15 @@ int main(const int argc, const char* argv[]) {
 		sum += n.get();
 	}
 	double duration = timer.End();
+    
+    // Operations after transactions are excluded from performance stats.
 	ProfilerStop();
-
+	dmtree->print_cache_info();
+    
+    sleep(20);
 	dmv->barrier("finish", config.ComputeNumber);
 
+	cout << "----------------------------" << endl;
 	cout << "Number of Thread: " << num_threads << endl;
 
 #ifdef USE_CORO

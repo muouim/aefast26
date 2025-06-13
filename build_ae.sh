@@ -41,7 +41,7 @@ id=1
 for n in $compute_nodes; do
     echo "Copying and compiling code on compute node $n"
     scp -r "$current_dir" skv-node$n:~/ > "$output_path" 2>&1
-    ssh skv-node$n "/bin/bash -c 'cd $folder_name && python3 ./AE/default.py --node_id $id && bash ./compile.sh > $output_path 2>&1'; exit;"
+    ssh skv-node$n "/bin/bash -c 'cd $folder_name && python3 ./AE/configure.py --node_id $id && bash ./compile.sh > $output_path 2>&1'; exit;"
     ((id++))
 done
 
@@ -57,13 +57,13 @@ echo "---------- Phase 4: Copy and compile code on memory nodes ----------"
 for n in $memory_nodes; do
     echo "Copying and compiling code on memory node $n"
     scp -r "$current_dir" skv-node$n:~/ > "$output_path" 2>&1
-    ssh skv-node$n "/bin/bash -c 'cd $folder_name && python3 ./AE/default.py --node_id -1 && bash ./compile.sh > $output_path 2>&1'; exit;"
+    ssh skv-node$n "/bin/bash -c 'cd $folder_name && python3 ./AE/configure.py --node_id -1 && bash ./compile.sh > $output_path 2>&1'; exit;"
 done
 
 # Phase 5: Build code on local node (node7)
 echo "---------- Phase 5: Build code on local node (node7) ----------"
 sudo sysctl -w vm.nr_hugepages=12768;
-python3 ./AE/default.py --node_id 0 && bash ./compile.sh > "$output_path" 2>&1
+python3 ./AE/configure.py --node_id 0 && bash ./compile.sh > "$output_path" 2>&1
 
 # Final: Mark status as completed
 echo "completed" > "$status_file"

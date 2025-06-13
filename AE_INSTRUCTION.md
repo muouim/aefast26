@@ -35,15 +35,6 @@ This section describes how to reproduce the evaluations in our paper. To simplif
 
 - **We suggest running the scripts of Exp#0 first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update)**.
 
-### Note on the concurrency
-
-Th
-
-```shell
-cd scripts
-find . -type f -name "*.sh" -exec chmod +x {} \;
-```
-
 ### Note on the experiment scripts
 
 These evaluation scripts require a long time to run. To avoid the interruption of the experiments, we suggest running the scripts in the background with `tmux`, `nohup`, `screen`, etc. In addition, please make sure that all scripts have been given execution permissions. You can do this according to the following example:
@@ -108,19 +99,38 @@ You can run this simple experiment via the following command:
 bash run_simple.sh
 ```
 
-The results will be output in the order shown below. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+The results will be output in the file `simple_results.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
 
 ```shell
-The storage overhead results:
-...
-The performance evaluation results:
-...
-The operation breakdown evaluation results:
-...
-The full-node recovery time cost results:
-...
-The resource usage evaluation results:
-...
+Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
+dmtree,ycsb-c,52.27219999999999,9.14222,9.43155,8.89601,9.19277,6.2328,9.37685
+dmtree,insert-only,26.19521,4.48305,4.46668,4.12491,4.34663,4.39217,4.38177
+dmtree,update-only,27.82448,4.53334,4.80242,4.59759,4.71459,4.47005,4.70649
+dmtree,scan-only,3.3973519999999997,0.565148,0.567675,0.564826,0.567579,0.565435,0.566689
+fptree,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+fptree,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+fptree,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+fptree,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+sherman,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+sherman,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+sherman,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+sherman,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+smart,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+smart,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+smart,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+smart,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+rolex,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+rolex,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+rolex,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+rolex,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dlsm,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dlsm,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dlsm,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dlsm,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+chime,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+chime,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+chime,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+chime,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 ```
 
 如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行

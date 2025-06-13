@@ -39,6 +39,11 @@ for project in $baselines; do
     fi
 done
 
+# Phase 2: Execute Python script to organize and output the results
+echo "---------- Phase 2: Organize and output the results ----------"
+
+python3 $base_dir/AE/print_exp0.py
+
 # Mark script as completed
 echo "completed" > "$status_file"
 
