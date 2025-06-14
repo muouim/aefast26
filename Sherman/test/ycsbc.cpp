@@ -225,8 +225,10 @@ void coro_worker(CoroYield& yield, uint64_t operation_count, uint64_t thread_cou
     if(finish_thread_count.load() == thread_count) {
         need_stop.store(true, std::memory_order_release);
         std::cout<<"now need stop"<<std::endl;
-    }
-    yield(master);
+	}
+	while(!need_stop.load(std::memory_order_acquire)) {
+		yield(master);
+	}
 }
 
 void coro_master(CoroYield& yield, int coro_cnt) {
@@ -253,10 +255,11 @@ void coro_master(CoroYield& yield, int coro_cnt) {
             busy_wait_queue.pop();
             yield(worker[next_coro]);
         }
-        if(need_stop.load(std::memory_order_acquire)) {
-            break;
-        }
-    }
+	}
+
+	for(int i = 0; i < coro_cnt; ++i) {
+		yield(worker[i]);
+	}
 }
 
 void run_coroutine(uint64_t operation_count, uint64_t thread_count, int coro_cnt) {
