@@ -1,7 +1,6 @@
 #include "util/timer.h"
 #include "util/ycsb.h"
 #include <future>
-#include <gperftools/profiler.h>
 #include <sys/types.h>
 #include <atomic>
 #include <cstdio>
@@ -692,8 +691,6 @@ int main(const int argc, const char *argv[])
     reset();
     rdma_mg->sync_with_computes_Cside();
 
-    ProfilerStart("my.prof");
-
     // perform transactions
     num_threads = stoi(argv[1]);
     actual_ops.clear();
@@ -714,10 +711,10 @@ int main(const int argc, const char *argv[])
         sum += n.get();
     }
     double duration = timer.End();
-    ProfilerStop();
 
     rdma_mg->sync_with_computes_Cside();
 
+	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;
 
 #ifdef USE_CORO

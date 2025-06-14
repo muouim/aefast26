@@ -2,13 +2,12 @@
 #include "util/timer.h"
 #include "util/ycsb.h"
 #include <future>
-#include <gperftools/profiler.h>
 
 #define USE_CORO
 #define DMTREE_LATENCY
 #define DMTREE_MAX_LATENCY_SIZE 100000
 
-bool need_stop = false;
+std::atomic<bool> need_stop(false);
 
 DMConfig config;
 uint64_t num_threads = 0;
@@ -198,10 +197,8 @@ void coro_worker(CoroYield& yield, uint64_t operation_count,
 	}
 
 	if(finish_thread_count.load() == thread_count) {
-		need_stop = true;
-	}
-	while(!need_stop) {
-		yield(master);
+		need_stop.store(true, std::memory_order_release);
+		std::cout << "now need stop" << std::endl;
 	}
 	yield(master);
 }
@@ -212,14 +209,19 @@ void coro_master(CoroYield& yield, int coro_cnt) {
 		yield(worker[i]);
 	}
 
-	while(!need_stop) {
+	while(!need_stop.load(std::memory_order_acquire)) {
 		ibv_wc wc[16];
 		int res = dmv->poll_rdma_cqs(wc);
 
+		if(need_stop.load(std::memory_order_acquire)) {
+			break;
+		}
 		for(int i = 0; i < res; i++) {
 			yield(worker[wc[i].wr_id]);
+			if(need_stop.load(std::memory_order_acquire)) {
+				break;
+			}
 		}
-
 		if(!busy_waiting_queue.empty()) {
 			auto next = busy_waiting_queue.front();
 			busy_waiting_queue.pop();
@@ -229,6 +231,9 @@ void coro_master(CoroYield& yield, int coro_cnt) {
 			} else {
 				busy_waiting_queue.push(next);
 			}
+		}
+		if(need_stop.load(std::memory_order_acquire)) {
+			break;
 		}
 	}
 }
@@ -317,7 +322,6 @@ int main(const int argc, const char* argv[]) {
 	config.ComputeNumber = kComputeNodeCount;
 	config.MemoryNumber = kMemoryNodeCount;
 
-
 	dmv = DMVerbs::getInstance(config);
 	dmv->registerThread();
 	dmtree = new DMTree(dmv);
@@ -336,9 +340,8 @@ int main(const int argc, const char* argv[]) {
 
 	for(int i = 0; i < num_threads; ++i) {
 		uint64_t insert_start =
-		    perload_ops +
-		    (dmv->getMyNodeID() % config.ComputeNumber) *
-		        (tran_ops / config.ComputeNumber);
+		    perload_ops + (dmv->getMyNodeID() % config.ComputeNumber) *
+		                      (tran_ops / config.ComputeNumber);
 		builder_[i] = util::WorkloadBuilder::Create(
 		    worloads.c_str(), distribution, perload_ops, insert_start, 0.99);
 		assert(builder_[i]);
@@ -348,28 +351,26 @@ int main(const int argc, const char* argv[]) {
 
 	// per-load key-value entries
 	num_threads = 72;
-    uint64_t start = (dmv->getMyNodeID() % config.ComputeNumber) *
-                        (perload_ops / config.ComputeNumber);
-    uint64_t thread_op = perload_ops / config.ComputeNumber / num_threads;
-    for(int i = 0; i < num_threads; ++i) {
-        sleep(1);
-        if(i == (num_threads - 1)) {
-            thread_op +=
-                (perload_ops % (config.ComputeNumber * num_threads));
-            thread_op += config.ComputeNumber;
-        }
-        actual_ops.emplace_back(
-            async(launch::async, thread_load, start, thread_op));
-        start += thread_op;
-    }
-    assert((int)actual_ops.size() == num_threads);
+	uint64_t start = (dmv->getMyNodeID() % config.ComputeNumber) *
+	                 (perload_ops / config.ComputeNumber);
+	uint64_t thread_op = perload_ops / config.ComputeNumber / num_threads;
+	for(int i = 0; i < num_threads; ++i) {
+		sleep(1);
+		if(i == (num_threads - 1)) {
+			thread_op += (perload_ops % (config.ComputeNumber * num_threads));
+			thread_op += config.ComputeNumber;
+		}
+		actual_ops.emplace_back(
+		    async(launch::async, thread_load, start, thread_op));
+		start += thread_op;
+	}
+	assert((int)actual_ops.size() == num_threads);
 
-    for(auto& n : actual_ops) {
-        assert(n.valid());
-        sum += n.get();
-    }
-    cerr << "# Loading records:\t" << sum << endl;
-
+	for(auto& n : actual_ops) {
+		assert(n.valid());
+		sum += n.get();
+	}
+	cerr << "# Loading records:\t" << sum << endl;
 
 	dmv->barrier("loading", config.ComputeNumber);
 	dmv->resetThread();
@@ -383,11 +384,11 @@ int main(const int argc, const char* argv[]) {
 	for(int i = 0; i < num_threads; ++i) {
 		if(i == (num_threads - 1)) {
 			thread_op += (perload_ops % num_threads);
-            thread_op += config.ComputeNumber;
+			thread_op += config.ComputeNumber;
 		}
 		actual_ops.emplace_back(
-		    async(launch::async, thread_warm,  start, thread_op));
-        start += thread_op;
+		    async(launch::async, thread_warm, start, thread_op));
+		start += thread_op;
 	}
 	assert((int)actual_ops.size() == num_threads);
 
@@ -402,9 +403,7 @@ int main(const int argc, const char* argv[]) {
 	dmv->barrier("running", config.ComputeNumber);
 	dmv->resetThread();
 
-	ProfilerStart("my.prof");
-
-	// perform transactions
+	// perform transactions, time between timer.begin() and timer.end().
 	num_threads = stoi(argv[1]);
 	actual_ops.clear();
 	utils::Timer<double> timer;
@@ -415,7 +414,6 @@ int main(const int argc, const char* argv[]) {
 		          tran_ops / config.ComputeNumber / num_threads, tran_ops));
 	}
 	assert((int)actual_ops.size() == num_threads);
-	dmtree->print_cache_info();
 
 	sum = 0;
 	for(auto& n : actual_ops) {
@@ -423,10 +421,13 @@ int main(const int argc, const char* argv[]) {
 		sum += n.get();
 	}
 	double duration = timer.End();
-	ProfilerStop();
+
+	// Operations after transactions are excluded from performance stats.
+	dmtree->print_cache_info();
 
 	dmv->barrier("finish", config.ComputeNumber);
 
+	cout << "----------------------------" << endl;
 	cout << "Number of Thread: " << num_threads << endl;
 
 #ifdef USE_CORO

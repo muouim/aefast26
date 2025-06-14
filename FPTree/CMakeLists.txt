@@ -9,7 +9,7 @@ add_definitions(-DBOOST_COROUTINES_NO_DEPRECATION_WARNING)
 # Compiler options
 add_definitions(-w)
 
-set(LINKS_FLAGS "-lmemcached -libverbs -lmlx5 -lpthread -lcityhash -lboost_system -lboost_coroutine -lboost_context -lprofiler -ltbb")
+set(LINKS_FLAGS "-lmemcached -libverbs -lmlx5 -lpthread -lcityhash -lboost_system -lboost_coroutine -lboost_context -ltbb")
 
 # head file path
 set(INCLUDE_BASE ${PROJECT_SOURCE_DIR}/include)

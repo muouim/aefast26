@@ -477,7 +477,7 @@ if(TimberSaw_BUILD_BENCHMARKS)
 
         "${bench_file}"
     )
-    target_link_libraries("${bench_target_name}" TimberSaw gmock gtest -lprofiler)
+    target_link_libraries("${bench_target_name}" TimberSaw gmock gtest)
     target_compile_definitions("${bench_target_name}"
       PRIVATE
         ${TimberSaw_PLATFORM_NAME}=1

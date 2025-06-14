@@ -14,9 +14,7 @@
 #include <random>
 #include <future>
 #include <unistd.h>
-#include <gperftools/profiler.h>
 
-#include "Timer.h"
 #include "util/ycsb.h"
 #include "util/timer.h"
 
@@ -25,7 +23,7 @@
 #define SHERMAN_LATENCY
 #define SHERMAN_MAX_LATENCY_SIZE 100000
 
-extern bool need_stop;
+std::atomic<bool> need_stops(false);
 
 uint64_t num_threads = 0;
 int kCoroCnt = 4;
@@ -241,7 +239,8 @@ void coro_worker(CoroPull &sink, WorkFunc work_func, uint64_t operation_count, u
               << thread_finish_ops << std::endl;
 
     if(finish_thread_count.load() == thread_count) {
-        need_stop = true;
+        need_stops.store(true, std::memory_order_release);
+        std::cout<<"now need stop"<<std::endl;
     }
     tree->busy_waiting_queue.push(sink.get());
     sink();
@@ -266,16 +265,16 @@ void run_coroutine(WorkFunc work_func, uint64_t operation_count, uint64_t thread
     for (int i = 0; i < coro_cnt; ++i) {
         tree->workers[i](i);
     }
-    while (!need_stop) {
+    while (!need_stops.load(std::memory_order_acquire)) {
         uint64_t next_coro_id;
 
         if (dsm->poll_rdma_cq_once(next_coro_id)) {
-        tree->workers[next_coro_id](next_coro_id);
+            tree->workers[next_coro_id](next_coro_id);
         }
         if (!tree->busy_waiting_queue.empty()) {
-        auto next_coro_id = tree->busy_waiting_queue.front();
-        tree->busy_waiting_queue.pop();
-        tree->workers[next_coro_id](next_coro_id);
+            auto next_coro_id = tree->busy_waiting_queue.front();
+            tree->busy_waiting_queue.pop();
+            tree->workers[next_coro_id](next_coro_id);
         }
     }
 
@@ -342,8 +341,6 @@ uint64_t thread_run(const uint64_t num_ops, const uint64_t tran_ops) {
 }
 
 int main(const int argc, const char* argv[]) {
-    
-    need_stop = false;
     
     load_count.store(0);
     finish_thread_count.store(0);
@@ -438,8 +435,6 @@ int main(const int argc, const char* argv[]) {
     dsm->barrier("running", kComputeNodeCount);
     dsm->resetThread();
 
-    ProfilerStart("my.prof");
-
     // perform transactions
 	num_threads = stoi(argv[1]);
     actual_ops.clear();
@@ -457,10 +452,10 @@ int main(const int argc, const char* argv[]) {
         sum += n.get();
     }
     double duration = timer.End();
-    ProfilerStop();
 
 	dsm->barrier("finish", kComputeNodeCount);
 
+	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;
 
 #ifdef USE_CORO

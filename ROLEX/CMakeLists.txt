@@ -7,7 +7,7 @@ set(CMAKE_C_FLAGS "-w -Wno-deprecated-declarations -Wno-unused-variable -Wno-unu
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++17 -w")
 
 #Link Options
-set(LINKS_FLAGS "-lnuma -lcityhash -lboost_system -lboost_coroutine -lboost_context -lpthread -libverbs -lmemcached -ltbb -lprofiler")
+set(LINKS_FLAGS "-lnuma -lcityhash -lboost_system -lboost_coroutine -lboost_context -lpthread -libverbs -lmemcached -ltbb")
 
 #Env Options
 option (STATIC_MN_IP "Use static MNs according the IPs of the nodes" OFF)

@@ -2,7 +2,6 @@
 #include "util/timer.h"
 #include "util/ycsb.h"
 #include <future>
-#include <gperftools/profiler.h>
 
 #define USE_CORO
 #define DMTREE_LATENCY
@@ -199,7 +198,7 @@ void coro_worker(CoroYield& yield, uint64_t operation_count,
 
 	if(finish_thread_count.load() == thread_count) {
 		need_stop.store(true, std::memory_order_release);
-        std::cout<<"now need stop"<<std::endl;
+		std::cout << "now need stop" << std::endl;
 	}
 	yield(master);
 }
@@ -214,10 +213,15 @@ void coro_master(CoroYield& yield, int coro_cnt) {
 		ibv_wc wc[16];
 		int res = dmv->poll_rdma_cqs(wc);
 
+		if(need_stop.load(std::memory_order_acquire)) {
+			break;
+		}
 		for(int i = 0; i < res; i++) {
 			yield(worker[wc[i].wr_id]);
+			if(need_stop.load(std::memory_order_acquire)) {
+				break;
+			}
 		}
-
 		if(!busy_waiting_queue.empty()) {
 			auto next = busy_waiting_queue.front();
 			busy_waiting_queue.pop();
@@ -227,6 +231,9 @@ void coro_master(CoroYield& yield, int coro_cnt) {
 			} else {
 				busy_waiting_queue.push(next);
 			}
+		}
+		if(need_stop.load(std::memory_order_acquire)) {
+			break;
 		}
 	}
 }
@@ -396,8 +403,6 @@ int main(const int argc, const char* argv[]) {
 	dmv->barrier("running", config.ComputeNumber);
 	dmv->resetThread();
 
-	ProfilerStart("my.prof");
-
 	// perform transactions, time between timer.begin() and timer.end().
 	num_threads = stoi(argv[1]);
 	actual_ops.clear();
@@ -418,7 +423,6 @@ int main(const int argc, const char* argv[]) {
 	double duration = timer.End();
 
 	// Operations after transactions are excluded from performance stats.
-	ProfilerStop();
 	dmtree->print_cache_info();
 
 	dmv->barrier("finish", config.ComputeNumber);
