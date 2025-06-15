@@ -17,16 +17,23 @@ We claim that the results might differ from those in our paper due to various fa
 
 We provide scripts to set up the environment for the evaluation, including cloning the code repository and copying and compiling it across multiple cluster nodes. The scripts are tested on Ubuntu 20.04 LTS. 
 
-**Step 1:** Run the following script on `skv-node7`, including cloning the code repository and copying and compiling it across multiple cluster nodes.
+**Step 1:** Clone the code repository `aefast26`.
 
 ```shell
+git clone https://github.com/muouim/aefast26.git
+```
+
+**Step 2:** Run the following script on `skv-node7`, including copying and compiling the code across multiple cluster nodes.
+
+```shell
+cd aefast26
 bash build_ae.sh
 ```
 
 To prevent repeated compilation and concurrent execution from disrupting the established environment, we have implemented a tracking and checking mechanism for the environment setup status when running the `build_ae.sh` script:
 
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
-- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“.
+- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
 - If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
 
 ## Evaluations
@@ -99,6 +106,13 @@ You can run this simple experiment via the following command:
 bash run_simple.sh
 ```
 
+To prevent repeated experiments and concurrent execution from disrupting the running experiments, we have implemented a tracking and checking mechanism for the simple experiment status when running the `run_simple.sh` script:
+
+- If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
+- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
+- If the script has already been executed, a message will prompt: "`Simple experiment is complete, no need to run the script again.`".
+- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/simple_exp.flag` the reset the simple experiment status.
+
 The results will be output in the file `simple_results.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
 
 ```shell
@@ -137,17 +151,17 @@ chime,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 
 - 协程判定退出的时候，会存在一些卡住的情况？还是server掉了
 
-### Overall system analysis (Exp#1~5 in our paper)
+### Overall system analysis (Exp#11~14 in our paper)
 
-#### Exp#1: Performance with YCSB core workloads (1 human minutes + ~ 20 compute-hours)
+#### Exp#11-#12: Performance with Micro-benchmarks (1 human minutes + ~ 20 compute-hours)
 
 *Running:*
 
 ```shell
-bash scripts/exp/Exp1-ycsb.sh
+bash run_overall.sh
 ```
 
-#### Exp#2: Micro-benchmarks on KV operations (1 human-minutes + ~ 5 compute-hours)
+#### Exp#14: Performance with YCSB core workloads (1 human-minutes + ~ 5 compute-hours)
 
 *Running:*
 
@@ -155,7 +169,7 @@ bash scripts/exp/Exp1-ycsb.sh
 bash scripts/exp/Exp2-operations.sh
 ```
 
-#### Exp#3: Performance breakdown (1 human-minutes + ~ 5 compute-hours)
+#### Exp#13: Tail latency with Micro-benchmarks (1 human-minutes + ~ 5 compute-hours)
 
 *Running:*
 
@@ -182,6 +196,8 @@ Only one round: 17.72
 ...
 ```
 
+### Parameter analysis (Exp#6~8 in our paper)
+
 #### Exp#4: Full-node recovery (1 human-minutes + ~ 14 compute-hours)
 
 *Running:*
@@ -205,7 +221,7 @@ Average: 3211.00, Min: 3211, Max: 3211
 ```
 
 * For Cassandra, the recovery time is the time cost of retrieving the SSTables from the replication only. The result will be output as in the example shown below.
-  
+
 ```shell
 [Exp info] scheme: cassandra, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
 Total recovery time cost (unit: s):
@@ -222,7 +238,7 @@ bash scripts/exp/Exp5-resource.sh
 
 *Results:* We summarize resource utilization as the 95th percentile of CPU usage, the 95th percentile of total memory overhead, total disk I/O, and total network overhead (bidirectional). In particular, we obtain the 95% percentile CPU usage based on the sum of the CPU usage of all nodes with the same timestamp and then calculate the average usage of each core (i.e., total usage/total number of cores). Therefore, the CPU usage results will be significantly affected by the differences in hardware configurations of different testbeds. The results will be output as in the example shown below.
 
-```shell
+```
 [Resource usage with degraded operations] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000, OPNumber: 600000
 95%-percentile CPU Usage (%):
 Only one round: 1.19
@@ -233,8 +249,6 @@ Only one round: 1.08
 Total Network traffic (GiB):
 Only one round: 202.38
 ```
-
-### Parameter analysis (Exp#6~8 in our paper)
 
 #### Exp#6: Impact of key and value sizes (1 human-minutes + ~ 40 compute-hours)
 

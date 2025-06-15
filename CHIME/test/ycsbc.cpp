@@ -19,7 +19,8 @@
 #include "util/timer.h"
 
 
-#define USE_CORO
+// #define USE_CORO
+bool enable_coro = true;
 #define SHERMAN_LATENCY
 #define SHERMAN_MAX_LATENCY_SIZE 100000
 
@@ -327,15 +328,16 @@ uint64_t thread_run(const uint64_t num_ops, const uint64_t tran_ops) {
     dsm->registerThread();
     uint64_t count = 0;
 
-#ifdef USE_CORO
-    run_coroutine(work_func, num_ops, num_threads, kCoroCnt);
-    count += num_ops;
-#else
-    for(uint64_t i = 0; i < num_ops; ++i) {
-        do_transaction();
-        count++;
+// #ifdef USE_CORO
+    if(enable_coro) {
+        run_coroutine(work_func, num_ops, num_threads, kCoroCnt);
+        count += num_ops;
+    } else {
+        for(uint64_t i = 0; i < num_ops; ++i) {
+            do_transaction();
+            count++;
+        }
     }
-#endif
     assert(count == num_ops);
     return count;
 }
@@ -357,6 +359,14 @@ int main(const int argc, const char* argv[]) {
     kCoroCnt = stoi(argv[2]);
     string worloads = argv[3];
 	string distribution = argv[4];
+
+    // For scan-heavy workloads like 'scan-only' or 'ycsb-e', 
+    // we disable coroutine because CHIME does not support coro-based scans.
+    if (worloads == "scan-only" || worloads == "ycsb-e") {
+        cout << "now disable coroutine" << endl;
+        enable_coro = false;
+        rehash_key_ = false;       
+    }
 
     // per-load key-value entries
     dsm->resetThread();
@@ -458,9 +468,11 @@ int main(const int argc, const char* argv[]) {
 	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;
 
-#ifdef USE_CORO
-    cout << "Number of OutStanding WR: " << kCoroCnt << endl;
-#endif
+// #ifdef USE_CORO
+    if (enable_coro) {
+        cout << "Number of OutStanding WR: " << kCoroCnt << endl;
+    }
+// #endif
     cout << "# Transaction throughput (MOPS): "
          << (tran_ops / kComputeNodeCount / num_threads * num_threads) / duration / 1000 / 1000 << endl;
     cout << "Total Time: " << duration << "s" << endl;

@@ -241,14 +241,8 @@ void coro_master(CoroYield& yield, int coro_cnt) {
         ibv_wc wc[16];
         int res = dsm->poll_rdma_cqs(wc);
 
-        if(need_stop.load(std::memory_order_acquire)) {
-            break;
-        }
         for(int i = 0; i < res; i++) {
             yield(worker[wc[i].wr_id]);
-            if(need_stop.load(std::memory_order_acquire)) {
-                break;
-            }
         }
         if(!busy_wait_queue.empty()) {
             auto next_coro = busy_wait_queue.front();
