@@ -13,7 +13,7 @@ We claim that the results might differ from those in our paper due to various fa
 * We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted a document-based reservation system along with an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
 * Additionally, to avoid excessive redundant testing, we will indicate which experiments have already been executed and have results available. It will be up to the AEC to decide whether to rerun those parts.
 
-## Environment setup
+## Environment setup (~20 minutes)
 
 We provide scripts to set up the environment for the evaluation, including cloning the code repository and copying and compiling it across multiple cluster nodes. The scripts are tested on Ubuntu 20.04 LTS. 
 
@@ -35,6 +35,7 @@ To prevent repeated compilation and concurrent execution from disrupting the est
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
 - If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
 - If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
+- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `/tmp/build_ae.flag` the reset the environment setup status.
 
 ## Evaluations
 
@@ -117,34 +118,34 @@ The results will be output in the file `simple_results.csv`. Here, we only show 
 
 ```shell
 Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
-dmtree,ycsb-c,52.27219999999999,9.14222,9.43155,8.89601,9.19277,6.2328,9.37685
-dmtree,insert-only,26.19521,4.48305,4.46668,4.12491,4.34663,4.39217,4.38177
-dmtree,update-only,27.82448,4.53334,4.80242,4.59759,4.71459,4.47005,4.70649
-dmtree,scan-only,3.3973519999999997,0.565148,0.567675,0.564826,0.567579,0.565435,0.566689
-fptree,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-fptree,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-fptree,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-fptree,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-sherman,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-sherman,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-sherman,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-sherman,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dmtree,ycsb-c,54.06629,9.05966,9.05314,9.35254,8.99495,8.42826,9.17774
+dmtree,insert-only,25.73273,4.226,4.48437,3.76439,4.34493,4.54498,4.36806
+dmtree,update-only,29.009770000000003,4.71533,4.95552,4.72805,4.78681,4.76687,5.05719
+dmtree,scan-only,3.458949,0.577726,0.577928,0.573417,0.577452,0.574609,0.577817
+fptree,ycsb-c,27.259149999999998,5.22737,5.48541,3.3955,5.20042,4.34572,3.60473
+fptree,insert-only,14.130600000000001,2.36712,2.38485,2.38407,2.37434,2.25659,2.36363
+fptree,update-only,9.369757,0.403045,4.50476,1.0075,0.378876,0.190536,2.88504
+fptree,scan-only,2.6030219999999997,0.422756,0.470054,0.423801,0.426647,0.425922,0.433842
+sherman,ycsb-c,9.81035,1.63564,1.63586,1.63274,1.63612,1.63413,1.63586
+sherman,insert-only,5.599708000000001,0.941612,0.940759,0.900779,0.940607,0.937173,0.938778
+sherman,update-only,1.043377,0.175791,0.175504,0.17064,0.175733,0.175515,0.170194
+sherman,scan-only,2.976456,0.502232,0.502179,0.485328,0.502499,0.497339,0.486879
 smart,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 smart,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 smart,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 smart,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-rolex,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-rolex,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-rolex,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-rolex,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+rolex,ycsb-c,10.092735000000001,2.13085,2.14771,1.53091,1.7991,0.561185,1.92298
+rolex,insert-only,6.9465,1.15863,1.15881,1.15495,1.15883,1.1566,1.15868
+rolex,update-only,7.77814,1.29709,1.29729,1.29319,1.29881,1.29542,1.29634
+rolex,scan-only,3.3353319999999997,0.571329,0.57144,0.515145,0.571268,0.567465,0.538685
 dlsm,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 dlsm,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 dlsm,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 dlsm,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-chime,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-chime,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-chime,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-chime,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+chime,ycsb-c,41.88355,6.98444,6.82849,6.75119,7.01289,7.25758,7.04896
+chime,insert-only,7.32711,1.21788,1.22641,1.22093,1.22528,1.2135,1.22311
+chime,update-only,18.6435,3.11733,3.14835,3.11122,3.12348,3.01072,3.1324
+chime,scan-only,2.719042,0.450702,0.45904,0.451323,0.448935,0.454698,0.454344
 ```
 
 如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行

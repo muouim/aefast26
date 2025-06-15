@@ -95,7 +95,6 @@ namespace sds {
                     num_items_(max - min + 1), base_(min) {
                 assert(num_items_ >= 2 && num_items_ < kMaxNumItems);
                 // mehcached_zipf_init(&state_, num_items_, zipfian_const, (rdtsc() * define::kMaxCoro + GetThreadID()) % (UINT32_MAX));
-                printf("now th_id: %d\n", (rdtsc() * define::kMaxCoro + rand()) % (UINT32_MAX));
                 mehcached_zipf_init(&state_, num_items_, zipfian_const, (rdtsc() * define::kMaxCoro + rand()) % (UINT32_MAX));
                 next(num_items_);
             }

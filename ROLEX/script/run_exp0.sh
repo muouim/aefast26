@@ -27,12 +27,32 @@ if [ ! -d "$ae_data_dir" ]; then
     echo "Created directory $ae_data_dir"
 fi
 
+for n in $memory_nodes; do
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=68768'; exit"
+done
+
+for n in $node; do
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=12768'; exit"
+    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+done
+sudo sysctl -w vm.nr_hugepages=12768
+rm -f "$dm_tree_dir/build/load_keys.data"
+
 for dis in $distribution; do
     for thread in $threads; do
         for file_name in $workloads; do
             echo "============================="
             echo "Starting run for $dis-$file_name with thread $thread"
-            
+
+            # Clean up load_keys.data before scan-only workload
+            if [ "$file_name" = "scan-only" ]; then
+                echo "Cleaning load_keys.data on compute nodes"
+                for n in $node; do
+                    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+                done
+                rm -f "$dm_tree_dir/build/load_keys.data"
+            fi
+
             # Run script on memory nodes
             echo "Running server process on memory nodes"
             ssh skv-node3 "/bin/bash -c 'cd $dm_tree_dir/script && bash restart_memc.sh'; exit;"

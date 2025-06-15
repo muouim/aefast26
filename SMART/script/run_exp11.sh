@@ -27,6 +27,16 @@ if [ ! -d "$ae_data_dir" ]; then
     echo "Created directory $ae_data_dir"
 fi
 
+for n in $memory_nodes; do
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=82768'; exit"
+done
+
+# Reduce hugepage count on compute nodes due to SMART's high temporary memory usage.
+for n in $node; do
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=3268'; exit"
+done
+sudo sysctl -w vm.nr_hugepages=3268
+
 for dis in $distribution; do
     for thread in $threads; do
         for file_name in $workloads; do

@@ -374,12 +374,6 @@ int main(const int argc, const char* argv[]) {
 
     dsm->registerThread();
 
-    std::ifstream infile("load_keys.data", std::ios::binary);  // 以二进制模式打开文件  
-    if (!infile) {  
-        load_train_keys(perload_ops + tran_ops);
-    }
-    rolex_index = new RolexIndex(dsm, train_keys);
-
     cout << "creating benchmark" << endl;
 	num_threads = stoi(argv[1]);
     kCoroCnt = stoi(argv[2]);
@@ -393,6 +387,12 @@ int main(const int argc, const char* argv[]) {
         enable_coro = false;
         rehash_key_ = false;
     }
+
+    std::ifstream infile("load_keys.data", std::ios::binary);  // 以二进制模式打开文件  
+    if (!infile) {  
+        load_train_keys(perload_ops + tran_ops);
+    }
+    rolex_index = new RolexIndex(dsm, train_keys);
 
     // per-load key-value entries
     dsm->resetThread();

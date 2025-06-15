@@ -111,7 +111,7 @@ constexpr uint64_t rdmaBufferSize     = 4;         // GB  [CONFIG] 4
 
 // Rolex
 constexpr uint64_t fakePort            = 8888;
-constexpr uint64_t modelRegionSize     = 4 * GB;
+constexpr uint64_t modelRegionSize     = 8 * GB;
 constexpr uint64_t fakeLeafRegionSize  = 2 * MB;
 constexpr uint64_t fakeRegLeafRegion   = 101;
 constexpr uint32_t leafSpanSize        = 8;   // 16  NOTE: this affects the bandwidth/IOPS
@@ -189,7 +189,7 @@ constexpr uint32_t bufferBlockSize    = 0;
 constexpr uint64_t kLockStartAddr   = 0;
 constexpr uint64_t kLockChipMemSize = ON_CHIP_SIZE * 1024;
 constexpr uint64_t kLocalLockNum    = 4 * MB;  // tune to an appropriate value (as small as possible without affect the performance)
-constexpr uint64_t kOnChipLockNum   = kLockChipMemSize * 8;  // 1bit-lock
+constexpr uint64_t kOnChipLockNum = kLockChipMemSize / sizeof(uint64_t);  // 64bit-lock
 
 // Synonym leaf
 constexpr uint64_t leafNumMax        = 1880000000 / leafSpanSize;  // [CONFIG]
