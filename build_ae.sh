@@ -11,8 +11,20 @@ output_path="$current_dir/compile.output"
 # Status file, placed in /tmp directory
 status_file="/tmp/build_ae.flag"
 
+# Function to calculate elapsed time
+elapsed_time() {
+    local start_time=$1
+    local end_time=$(date +%s)
+    echo "$((end_time - start_time))"
+}
+
 # Phase 0: Check script running status
 echo "---------- Phase 0: Check script running status ----------"
+
+# Output the current time when the script starts
+start_time=$(date +%s)
+current_time=$(date)
+echo "Script started at: $current_time"
 
 if [ -f "$status_file" ]; then
     if grep -q "running" "$status_file"; then
@@ -62,10 +74,15 @@ done
 
 # Phase 5: Build code on local node (node7)
 echo "---------- Phase 5: Build code on local node (node7) ----------"
-sudo sysctl -w vm.nr_hugepages=12768;
+sudo sysctl -w vm.nr_hugepages=12768
 python3 ./AE/configure.py --node_id 0 && bash ./compile.sh > "$output_path" 2>&1
 
 # Final: Mark status as completed
 echo "completed" > "$status_file"
 
+# Output the final time and total elapsed time
+end_time=$(date +%s)
+elapsed=$(elapsed_time $start_time)
+current_time=$(date)
+echo "Script completed at: $current_time, Total elapsed time: $elapsed seconds"
 echo "---------- All phases completed. Output saved to $output_path ----------"
