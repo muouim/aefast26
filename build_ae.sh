@@ -76,11 +76,13 @@ echo "completed" > "$status_file"
 
 # Output the final time and total elapsed time
 end_time=$(date +%s)
-elapsed=$(elapsed_time $start_time)
+diff=$((end_time - start_time))
 current_time=$(date)
-if [ $(echo "$elapsed >= 1" | bc) -eq 1 ]; then
+if [ $diff -ge 3600 ]; then
+    elapsed=$(echo "scale=2; $diff / 3600" | bc)
     echo "Script completed at: $current_time, Total elapsed time: $elapsed hours"
 else
+    elapsed=$(echo "scale=2; $diff / 60" | bc)
     echo "Script completed at: $current_time, Total elapsed time: $elapsed minutes"
 fi
 echo "---------- All phases completed. Output saved to $output_path ----------"

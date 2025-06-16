@@ -2,7 +2,7 @@
 
 trap 'kill $(jobs -p)' SIGINT
 
-baselines="DMTree FPTree Sherman SMART ROLEX dLSM CHIME"
+baselines="DMTree FPTree Sherman SMART ROLEX CHIME dLSM"
 base_dir="$PWD"
 status_file="/tmp/simple_exp.flag"
 output_path="$base_dir/simple.output"
@@ -61,9 +61,16 @@ for project in $baselines; do
 
     # Output the current time and elapsed time after each project
     current_time=$(date)
-    elapsed=$(elapsed_time $start_time)
+    raw_diff=$(( $(date +%s) - start_time ))
+    if [ $raw_diff -ge 3600 ]; then
+        elapsed=$(echo "scale=2; $raw_diff / 3600" | bc)
+        unit="hours"
+    else
+        elapsed=$(echo "scale=2; $raw_diff / 60" | bc)
+        unit="minutes"
+    fi
     echo "$project's results are output to $output_path"
-    echo "Time after $project: $current_time, Elapsed time: $elapsed seconds"
+    echo "Time after $project: $current_time, Elapsed time: $elapsed $unit"
 
     python3 $base_dir/AE/print_exp0.py
 done
@@ -78,11 +85,13 @@ echo "completed" > "$status_file"
 
 # Output the final time and total elapsed time
 end_time=$(date +%s)
-elapsed=$(elapsed_time $start_time)
+diff=$((end_time - start_time))
 current_time=$(date)
-if [ $(echo "$elapsed >= 1" | bc) -eq 1 ]; then
+if [ $diff -ge 3600 ]; then
+    elapsed=$(echo "scale=2; $diff / 3600" | bc)
     echo "Script completed at: $current_time, Total elapsed time: $elapsed hours"
 else
+    elapsed=$(echo "scale=2; $diff / 60" | bc)
     echo "Script completed at: $current_time, Total elapsed time: $elapsed minutes"
 fi
 echo "---------- All phases completed. Output saved to $output_path ----------"

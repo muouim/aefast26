@@ -35,7 +35,7 @@ To prevent repeated compilation and concurrent execution from disrupting the est
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
 - If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
 - If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
-- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `/tmp/build_ae.flag` the reset the environment setup status.
+- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `rm /tmp/build_ae.flag` the reset the environment setup status.
 
 ## Evaluations
 
@@ -72,32 +72,11 @@ Only one round: 1369.53
 Only one round: 1883.00
 ```
 
-* If the running round number is between 1 and 5, the result will be output with the average, maximum, and minimum, as shown in the example below.
-
-```shell
-[Exp info] scheme: elect, workload: Write, KVNumber: 600000, OPNumber: 60000, KeySize: 24, ValueSize: 1000, ClientNumber: 16, ConsistencyLevel: ONE, ExtraFlag: 
-Throughput (unit: op/s): 
-Average: 9992.38, Min:  9753.433208489389, Max:  10231.330379889298
-[READ] Average operation latency (unit: us):
-Average: 1369.53, Min: 1355.774261, Max: 1383.292994
-[READ] 99th percentile latency (unit: us):
-Average: 1883.00, Min: 1823, Max: 1943
-```
-
-For the **storage overhead evaluation**, the result will be summarized based on the total, hot-tier, and cold-tier storage overhead. For example:
-
-```shell
-[Exp info] Scheme: elect, KVNumber: 100000000, KeySize: 24, ValueSize: 1000
-Total storage overhead (unit: GiB): 185.90
-Hot-tier storage overhead (unit: GiB): 134.10
-Cold-tier storage overhead (unit: GiB): 51.80
-```
-
 For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized similarly to the summarized performance results. Again, depending on the number of running rounds conducted, the output formats include options such as a single-round summary (run experiment with one round) or more comprehensive data sets featuring average, maximum, and minimum values (run experiment with 2~4 rounds), as well as average values with a 95% Student-T distribution confidence interval (run experiment more than five rounds). We provide examples of the summarized results of operation breakdown, recovery time cost, and resource usage in each related evaluation.
 
 ### Simple experiment (For quick verification)
 
-#### Exp#0: Simple experiment (1 human-minutes + ~ 10 compute-hours)
+#### Exp#0: Simple experiment (~ 6 hours)
 
 We provide this simple experiment to verify our main experimental results quickly: **TODO: DMTree provides XXX...... similar performance compared to Cassandra while significantly reducing hot-tier storage overhead.** Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
 
