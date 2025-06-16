@@ -37,10 +37,13 @@ for project in $baselines; do
     else
         echo "Error: $script_path not found"
     fi
+
+    echo "$project's results are output to $output_path"
+    python3 $base_dir/AE/print_exp0.py
 done
 
 # Phase 2: Execute Python script to organize and output the results
-echo "---------- Phase 2: Organize and output the results ----------"
+echo "---------- Phase 2: Organize and output all the results ----------"
 
 python3 $base_dir/AE/print_exp0.py
 

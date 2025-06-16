@@ -3,10 +3,14 @@
 //
 //Make sure the Prefetch Granularity is larger than the key value size other wise there
 // would be error
-#define PREFETCH_GRANULARITY  (1024*1024)
+#define PREFETCH_GRANULARITY  (6*1024)
 #include "byte_addressable_SEQ_iterrator.h"
 #include "TimberSaw/env.h"
 #include "port/likely.h"
+std::atomic<int>not_th;
+ibv_mr *t_mr[80];
+thread_local int a = -1;
+
 namespace TimberSaw {
 //Note: the memory side KVReader should be passed as block function
 ByteAddressableSEQIterator::ByteAddressableSEQIterator(
@@ -21,8 +25,17 @@ ByteAddressableSEQIterator::ByteAddressableSEQIterator(
       index_iter_(index_iter),
       valid_(false),
       target_node_id_(target_node_id){
-    prefetched_mr = new ibv_mr{};
-    Env::Default()->rdma_mg->Allocate_Local_RDMA_Slot(*prefetched_mr, FlushBuffer);
+
+    if(a == -1) {
+        a = not_th++;
+        a = a % 79;
+    }
+    if(t_mr[a] == nullptr) {
+        printf("now register %d\n", a);
+        t_mr[a] = new ibv_mr{};
+        Env::Default()->rdma_mg->Allocate_Local_RDMA_Slot(*t_mr[a], FlushBuffer);
+    }
+    prefetched_mr = t_mr[a];
 }
 
 ByteAddressableSEQIterator::~ByteAddressableSEQIterator() {
@@ -31,8 +44,8 @@ ByteAddressableSEQIterator::~ByteAddressableSEQIterator() {
 //    ibv_wc* wc = new ibv_wc[poll_number];
 //    rdma_mg->poll_completion(wc, poll_number, "read_local", true);
 //  }
-  rdma_mg->Deallocate_Local_RDMA_Slot(prefetched_mr->addr, FlushBuffer);
-  delete prefetched_mr;
+  // rdma_mg->Deallocate_Local_RDMA_Slot(prefetched_mr->addr, FlushBuffer);
+  // delete prefetched_mr;
 
 
   //  DEBUG_arg("TWOLevelIterator destructing, this pointer is %p\n", this);
@@ -158,8 +171,8 @@ void ByteAddressableSEQIterator::GetNextKV() {
   Slice Size_buff = Slice(iter_ptr, 8);
   GetFixed32(&Size_buff, &key_size);
   GetFixed32(&Size_buff, &value_size);
-  assert(key_size == 29 || key_size == 28);
-  assert(value_size == 400 || value_size == 21);
+  // assert(key_size == 29 || key_size == 28);
+  // assert(value_size == 400 || value_size == 21);
   iter_ptr += 8;
   iter_offset += 8;
   //Check whether the

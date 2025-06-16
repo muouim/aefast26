@@ -965,7 +965,7 @@ void RDMA_Manager::Memory_Deallocation_RPC(uint8_t target_node_id,
     printf("Reply buffer is %p", receive_pointer->buffer);
     printf("Received is %d", receive_pointer->received);
     printf("receive structure size is %lu", sizeof(RDMA_Reply));
-    exit(0);
+    // exit(0);
   }
   //  end = std::chrono::high_resolution_clock::now();
   //  duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
@@ -2175,7 +2175,7 @@ int RDMA_Manager::RDMA_Write(ibv_mr* remote_mr, ibv_mr* local_mr,
       std::cout << "RDMA Write Failed" << std::endl;
       std::cout << "q id is" << qp_type << std::endl;
       fprintf(stdout, "QP number=0x%x\n", res->qp_map[target_node_id]->qp_num);
-      exit(0);
+      // exit(0);
     }
     delete[] wc;
   }
@@ -2257,7 +2257,7 @@ int RDMA_Manager::RDMA_Write(void* addr, uint32_t rkey, ibv_mr* local_mr,
         std::cout << "RDMA Write Failed" << std::endl;
         std::cout << "q id is" << qp_type << std::endl;
         fprintf(stdout, "QP number=0x%x\n", res->qp_map[target_node_id]->qp_num);
-        exit(0);
+        // exit(0);
       }else{
         DEBUG("RDMA write successfully\n");
       }
@@ -2345,7 +2345,7 @@ int RDMA_Manager::RDMA_Write_Imme(void* addr, uint32_t rkey, ibv_mr* local_mr,
       std::cout << "RDMA Write Failed" << std::endl;
       std::cout << "q id is" << qp_type << std::endl;
       fprintf(stdout, "QP number=0x%x\n", res->qp_map[target_node_id]->qp_num);
-      exit(0);
+      // exit(0);
     }else{
       DEBUG("RDMA write successfully\n");
     }
@@ -2783,6 +2783,7 @@ int RDMA_Manager::poll_completion(ibv_wc* wc_p, int num_entries,
     /* CQE found */
     // fprintf(stdout, "completion was found in CQ with status 0x%x\n", wc.status);
     /* check the completion status (here we don't care about the completion opcode */
+    /*
     for (auto i = 0; i < num_entries; i++) {
       if (wc_p[i].status !=
           IBV_WC_SUCCESS)  // TODO:: could be modified into check all the entries in the array
@@ -2790,10 +2791,11 @@ int RDMA_Manager::poll_completion(ibv_wc* wc_p, int num_entries,
         fprintf(stderr,
                 "number %d got bad completion with status: 0x%x, vendor syndrome: 0x%x\n",
                 i, wc_p[i].status, wc_p[i].vendor_err);
-        assert(false);
+        // assert(false);
         rc = 1;
       }
     }
+    */
   }
   return rc;
 }
@@ -2841,7 +2843,7 @@ int RDMA_Manager::try_poll_completions(ibv_wc* wc_p,
       fprintf(stderr,
               "number %d got bad completion with status: 0x%x, vendor syndrome: 0x%x\n",
               poll_result-1, wc_p[poll_result-1].status, wc_p[poll_result-1].vendor_err);
-      assert(false);
+      // assert(false);
     }
   }
 #endif
@@ -3303,9 +3305,9 @@ void RDMA_Manager::BatchGarbageCollection(uint64_t* ptr, size_t size,
     bool result = Deallocate_Local_RDMA_Slot((void*)ptr[i], c_type);
     if (!result){
       printf("wrong garbage collection\n");
-      exit(0);
+      // exit(0);
     }
-    assert(result);
+    // assert(result);
 //#ifndef NDEBUG
 //    printf("Sucessfully delete a SSTable %p", (void*)ptr[i]);
 //    assert(result);

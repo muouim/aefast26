@@ -59,7 +59,9 @@ class DBIter : public Iterator {
   DBIter(const DBIter&) = delete;
   DBIter& operator=(const DBIter&) = delete;
 
-  ~DBIter() override { delete iter_; }
+  ~DBIter() override { 
+    // delete iter_; 
+  }
   bool Valid() const override { return valid_; }
   Slice key() const override {
     assert(valid_);

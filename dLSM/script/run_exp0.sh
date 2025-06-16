@@ -28,7 +28,7 @@ if [ ! -d "$ae_data_dir" ]; then
 fi
 
 for n in $memory_nodes; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=82768'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=68768'; exit"
 done
 
 for n in $node; do

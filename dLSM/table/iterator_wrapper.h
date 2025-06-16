@@ -32,7 +32,7 @@ class IteratorWrapper {
 #ifndef NDEBUG
 //    printf("Delete iter_ when replacing the iterator, deleted iter_ is %p, new iterator is %p\n", iter_, iter);
 #endif
-    delete iter_;
+    // delete iter_;
 
     iter_ = iter;
     if (iter_ == nullptr) {

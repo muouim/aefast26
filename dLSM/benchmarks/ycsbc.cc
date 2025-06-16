@@ -152,7 +152,6 @@ using Value = uint64_t;
 #define DMTREE_LATENCY
 #define DMTREE_MAX_LATENCY_SIZE 100000
 
-// 协程是否需要实现
 DB *db_;
 WriteOptions write_options_;
 
@@ -213,7 +212,7 @@ void saveKeysToFile(const std::string& filename) {
 bool loadKeysFromFile(const std::string& filename) {  
     std::ifstream infile(filename, std::ios::binary);  
     if (!infile) {  
-        std::cerr << "can not read from file" << filename << std::endl;  
+        std::cerr << "can not read from file: " << filename << std::endl;  
         return false;  
     }  
 
@@ -367,8 +366,7 @@ void do_transaction(int th_id, Slice &key, RandomGenerator &a)
             iter->Next();
             count++;
         }
-        if(iter->Valid())
-            delete iter;
+        delete iter;
     }
     if (record.type == util::READMODIFYWRITE)
     {
@@ -571,6 +569,9 @@ void Open()
     }
 }
 
+extern std::atomic<int>not_th;
+extern ibv_mr *t_mr[80];
+
 int main(const int argc, const char *argv[])
 {
     TimberSaw::RDMA_Manager::node_id = COMPUTE_ID + 1;
@@ -691,6 +692,11 @@ int main(const int argc, const char *argv[])
     reset();
     rdma_mg->sync_with_computes_Cside();
 
+    for(int i = 0; i< 80; i++) {
+        t_mr[i] = new ibv_mr{};
+        Env::Default()->rdma_mg->Allocate_Local_RDMA_Slot(*t_mr[i], FlushBuffer);
+    }
+
     // perform transactions
     num_threads = stoi(argv[1]);
     actual_ops.clear();
@@ -712,7 +718,8 @@ int main(const int argc, const char *argv[])
     }
     double duration = timer.End();
 
-    rdma_mg->sync_with_computes_Cside();
+    sleep(30);
+    // rdma_mg->sync_with_computes_Cside();
 
 	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;
