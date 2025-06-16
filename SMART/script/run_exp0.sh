@@ -27,6 +27,8 @@ if [ ! -d "$ae_data_dir" ]; then
     echo "Created directory $ae_data_dir"
 fi
 
+# Configure hugepages on compute and memory nodes
+echo "---------- Configuring hugepages on compute and memory nodes ----------"
 for n in $memory_nodes; do
     ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=82768'; exit"
 done

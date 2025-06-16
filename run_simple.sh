@@ -7,11 +7,20 @@ base_dir="$PWD"
 status_file="/tmp/simple_exp.flag"
 output_path="$base_dir/simple.output"
 
-# Function to calculate elapsed time
+# Function to calculate elapsed time and format it
 elapsed_time() {
     local start_time=$1
     local end_time=$(date +%s)
-    echo "$((end_time - start_time))"
+    local diff=$((end_time - start_time))
+
+    # Convert to minutes or hours
+    if [ $diff -ge 3600 ]; then
+        # More than 1 hour, show in hours
+        echo "scale=2; $diff / 3600" | bc
+    else
+        # Less than 1 hour, show in minutes
+        echo "scale=2; $diff / 60" | bc
+    fi
 }
 
 # Phase 0: Check script running status
@@ -71,5 +80,9 @@ echo "completed" > "$status_file"
 end_time=$(date +%s)
 elapsed=$(elapsed_time $start_time)
 current_time=$(date)
-echo "Script completed at: $current_time, Total elapsed time: $elapsed seconds"
+if [ $(echo "$elapsed >= 1" | bc) -eq 1 ]; then
+    echo "Script completed at: $current_time, Total elapsed time: $elapsed hours"
+else
+    echo "Script completed at: $current_time, Total elapsed time: $elapsed minutes"
+fi
 echo "---------- All phases completed. Output saved to $output_path ----------"

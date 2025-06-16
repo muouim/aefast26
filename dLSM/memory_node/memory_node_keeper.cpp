@@ -1841,7 +1841,7 @@ int Memory_Node_Keeper::server_sock_connect(const char* servername, int port) {
           send_pointer->content.cpu_info.core_number = rdma_mg->rpter.numa_bind_core_num;
 //#ifndef NDEBUG
           if (print_counter++ == 200){
-            printf("Current cpu utilization is %f\n", cpu_util_percentage);
+            // printf("Current cpu utilization is %f\n", cpu_util_percentage);
             print_counter = 0;
           }
 //#endif

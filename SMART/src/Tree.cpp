@@ -1124,7 +1124,7 @@ if(enable_cache) {
   local_lock_table->release_local_read_lock(k, lock_res, search_res, v);  // handover the ret leaf addr
 #endif
   if(search_res != true){
-    std::cout<<"no key"<<std::endl;
+    // std::cout<<"no key"<<std::endl;
   }
   return search_res;
 }
