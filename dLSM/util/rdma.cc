@@ -736,7 +736,7 @@ void RDMA_Manager::remote_cpu_util_heart_beater_receiver(
 //    uint8_t check_byte = request->content.ive.check_byte;
   server_cpu_percent.at(target_node_id)->store(request->content.cpu_info.cpu_util);
 //  remote_compaction_issued.at(target_node_id_)->store(false);
-  DEBUG_arg("Recieve the cpu utilization %f\n", request->content.cpu_info.cpu_util);
+  // DEBUG_arg("Recieve the cpu utilization %f\n", request->content.cpu_info.cpu_util);
   delete request;
 
 }
@@ -839,8 +839,8 @@ bool RDMA_Manager::Local_Memory_Register(char** p2buffpointer,
   int mr_flags = 0;
   if (node_id%2 == 1 || pre_allocated_pool.empty()){
 
-    // *p2buffpointer = new char[size];
-    *p2buffpointer = (char*)hugePageAlloc(size);
+    *p2buffpointer = new char[size];
+    // *p2buffpointer = (char*)hugePageAlloc(size);
     if (!*p2buffpointer) {
       fprintf(stderr, "failed to malloc bytes to memory buffer\n");
       return false;
@@ -1005,8 +1005,8 @@ bool RDMA_Manager::Preregister_Memory(int gb_number) {
 //    total_registered_size = total_registered_size + size;
     std::fprintf(stderr, "Pre allocate registered memory %d GB %30s\r", i, "");
     std::fflush(stderr);
-    // char* buff_pointer = new char[size];
-    char* buff_pointer = (char*)hugePageAlloc(size);
+    char* buff_pointer = new char[size];
+    // char* buff_pointer = (char*)hugePageAlloc(size);
     if (!buff_pointer) {
       fprintf(stderr, "failed to malloc bytes to memory buffer\n");
       return false;

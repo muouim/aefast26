@@ -49,8 +49,10 @@ fi
 echo "---------- Phase 1: Run simple experiment for each baseline ----------"
 
 for project in $baselines; do
+    echo "============================="
     echo "Running experiment for $project"
     script_path="$base_dir/$project/script/run_exp0.sh"
+    project_start_time=$(date +%s)
 
     if [ -f "$script_path" ]; then
         bash "$script_path" > "$output_path" 2>&1
@@ -62,6 +64,8 @@ for project in $baselines; do
     # Output the current time and elapsed time after each project
     current_time=$(date)
     raw_diff=$(( $(date +%s) - start_time ))
+    project_diff=$(( $(date +%s) - project_start_time ))
+
     if [ $raw_diff -ge 3600 ]; then
         elapsed=$(echo "scale=2; $raw_diff / 3600" | bc)
         unit="hours"
@@ -69,8 +73,19 @@ for project in $baselines; do
         elapsed=$(echo "scale=2; $raw_diff / 60" | bc)
         unit="minutes"
     fi
+
+    if [ $project_diff -ge 3600 ]; then
+        proj_elapsed=$(echo "scale=2; $project_diff / 3600" | bc)
+        proj_unit="hours"
+    else
+        proj_elapsed=$(echo "scale=2; $project_diff / 60" | bc)
+        proj_unit="minutes"
+    fi
+
     echo "$project's results are output to $output_path"
-    echo "Time after $project: $current_time, Elapsed time: $elapsed $unit"
+    echo "Time after $project: $current_time"
+    echo " - Elapsed since script started: $elapsed $unit"
+    echo " - Time for this project: $proj_elapsed $proj_unit"
 
     python3 $base_dir/AE/print_exp0.py
 done

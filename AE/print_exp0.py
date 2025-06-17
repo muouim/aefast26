@@ -1,5 +1,8 @@
 import re
 import csv
+import os
+
+print("========== Start Parsing ==========")
 
 # List of baselines, workloads, compute nodes
 baselines = ["dmtree", "fptree", "sherman", "smart", "rolex", "dlsm", "chime"]
@@ -15,44 +18,45 @@ throughput_pattern = r'# Transaction throughput \(MOPS\):\s*(\d+\.\d+)'
 # List to store the data for each Index and workload
 data = []
 
-# Iterate over each baseline and workload
+# Iterate over each baseline
 for baseline in baselines:
+    all_files_found = True  # Assume all files exist for this baseline
+
     for workload in workloads:
-        row = [baseline, workload]  # First columns are Index (baseline) and workload name
-        
-        total_throughput = 0.0  # Initialize total throughput for each baseline and workload
-        
-        # Iterate over nodes to collect the Transaction throughput (MOPS) data
+        row = [baseline, workload]  # First columns are Index and workload name
+        total_throughput = 0.0  # Initialize total throughput
+
         for node in nodes:
-            # Include the distribution variable in the filename
             file_path = f"./AE/Data/{node}-exp0_{baseline}_{workload}-{distribution}-thread72-coro4.txt"
             throughput = 0.0
-            
-            try:
-                with open(file_path, 'r') as file:
-                    for line in file:
-                        # Extract Transaction throughput (MOPS)
-                        throughput_match = re.search(throughput_pattern, line)
-                        if throughput_match:
-                            throughput += float(throughput_match.group(1))
-            except FileNotFoundError:
-                print(f"File {file_path} not found.")
-            
-            # Add the throughput data for the current node to the row
+
+            if not os.path.exists(file_path):
+                all_files_found = False
+                continue
+
+            with open(file_path, 'r') as file:
+                for line in file:
+                    match = re.search(throughput_pattern, line)
+                    if match:
+                        throughput += float(match.group(1))
+
             row.append(throughput)
             total_throughput += throughput
-        
-        # Insert the total throughput value before Node1
+
+        # Insert total throughput before node columns
         row.insert(2, total_throughput)
         data.append(row)
 
-# Save the data to a CSV file
+    if all_files_found:
+        print(f"Successfully parsed all workloads for baseline: {baseline}")
+
+# Save to CSV
 output_file = 'simple_results.csv'
 with open(output_file, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
-    # Write the header with Total before Node1
     writer.writerow(["Index", "Workload", "Total", "Node1", "Node2", "Node4", "Node5", "Node6", "Node7"])
-    # Write the data
     writer.writerows(data)
 
+print("======================================")
 print(f"Transaction throughput data has been saved to {output_file}")
+print("======================================")

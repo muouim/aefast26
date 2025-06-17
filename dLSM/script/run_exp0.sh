@@ -27,16 +27,16 @@ if [ ! -d "$ae_data_dir" ]; then
     echo "Created directory $ae_data_dir"
 fi
 
-# Configure hugepages on compute and memory nodes
+# Configure hugepages on compute and memory nodes, dLSM does not use hugepage
 echo "---------- Configuring hugepages on compute and memory nodes ----------"
 for n in $memory_nodes; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=68768'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=0'; exit"
 done
 
 for n in $node; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=12768'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=0'; exit"
 done
-sudo sysctl -w vm.nr_hugepages=12768
+sudo sysctl -w vm.nr_hugepages=0
 
 for dis in $distribution; do
     for thread in $threads; do

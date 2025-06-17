@@ -84,6 +84,7 @@ You can run this simple experiment via the following command:
 
 ```shell
 bash run_simple.sh
+nohup bash run_simple.sh >run_simple.output 2>&1 &
 ```
 
 To prevent repeated experiments and concurrent execution from disrupting the running experiments, we have implemented a tracking and checking mechanism for the simple experiment status when running the `run_simple.sh` script:
@@ -97,39 +98,89 @@ The results will be output in the file `simple_results.csv`. Here, we only show 
 
 ```shell
 Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
-dmtree,ycsb-c,54.06629,9.05966,9.05314,9.35254,8.99495,8.42826,9.17774
-dmtree,insert-only,25.73273,4.226,4.48437,3.76439,4.34493,4.54498,4.36806
-dmtree,update-only,29.009770000000003,4.71533,4.95552,4.72805,4.78681,4.76687,5.05719
-dmtree,scan-only,3.458949,0.577726,0.577928,0.573417,0.577452,0.574609,0.577817
-fptree,ycsb-c,27.259149999999998,5.22737,5.48541,3.3955,5.20042,4.34572,3.60473
-fptree,insert-only,14.130600000000001,2.36712,2.38485,2.38407,2.37434,2.25659,2.36363
-fptree,update-only,9.369757,0.403045,4.50476,1.0075,0.378876,0.190536,2.88504
-fptree,scan-only,2.6030219999999997,0.422756,0.470054,0.423801,0.426647,0.425922,0.433842
-sherman,ycsb-c,9.81035,1.63564,1.63586,1.63274,1.63612,1.63413,1.63586
-sherman,insert-only,5.599708000000001,0.941612,0.940759,0.900779,0.940607,0.937173,0.938778
-sherman,update-only,1.043377,0.175791,0.175504,0.17064,0.175733,0.175515,0.170194
-sherman,scan-only,2.976456,0.502232,0.502179,0.485328,0.502499,0.497339,0.486879
-smart,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-smart,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-smart,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-smart,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-rolex,ycsb-c,10.092735000000001,2.13085,2.14771,1.53091,1.7991,0.561185,1.92298
-rolex,insert-only,6.9465,1.15863,1.15881,1.15495,1.15883,1.1566,1.15868
-rolex,update-only,7.77814,1.29709,1.29729,1.29319,1.29881,1.29542,1.29634
-rolex,scan-only,3.3353319999999997,0.571329,0.57144,0.515145,0.571268,0.567465,0.538685
-dlsm,ycsb-c,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-dlsm,insert-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-dlsm,update-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-dlsm,scan-only,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-chime,ycsb-c,41.88355,6.98444,6.82849,6.75119,7.01289,7.25758,7.04896
-chime,insert-only,7.32711,1.21788,1.22641,1.22093,1.22528,1.2135,1.22311
-chime,update-only,18.6435,3.11733,3.14835,3.11122,3.12348,3.01072,3.1324
-chime,scan-only,2.719042,0.450702,0.45904,0.451323,0.448935,0.454698,0.454344
+dmtree,ycsb-c,53.10896,9.01745,8.88033,8.3974,8.90831,9.18188,8.72359
+dmtree,insert-only,26.03086,4.22692,4.49647,4.2974,4.29571,4.43153,4.28283
+dmtree,update-only,29.37954,4.88428,4.99175,4.52919,5.08371,5.05395,4.83666
+dmtree,scan-only,3.419791,0.56917,0.571074,0.567664,0.570717,0.570537,0.570629
+fptree,ycsb-c,26.43315,4.33411,4.39609,4.42018,4.4047,4.4433,4.43477
+fptree,insert-only,14.01274,2.32656,2.35896,2.32702,2.33644,2.33624,2.32752
+fptree,update-only,14.837250000000001,2.45573,2.47846,2.46987,2.47413,2.47883,2.48023
+fptree,scan-only,2.660171,0.44338,0.443395,0.442956,0.443469,0.443526,0.443445
+sherman,ycsb-c,9.808539999999999,1.63502,1.6351,1.63325,1.63514,1.63513,1.6349
+sherman,insert-only,5.976302,0.997505,0.997568,0.996693,0.996444,0.994714,0.993378
+sherman,update-only,1.849818,0.308353,0.307522,0.30745,0.308783,0.308824,0.308886
+sherman,scan-only,2.989694,0.498344,0.498363,0.497923,0.498349,0.498357,0.498358
+smart,ycsb-c,52.60434,7.05895,9.17384,8.28245,9.30797,9.43038,9.35075
+smart,insert-only,11.144329999999998,1.76615,1.97517,1.42142,1.85197,2.14946,1.98016
+smart,update-only,24.482090000000003,3.62905,4.24562,4.02303,4.15574,4.1914,4.23725
+smart,scan-only,1.1028170000000002,0.183401,0.185141,0.182591,0.183932,0.184405,0.183347
+rolex,ycsb-c,11.34924,1.89276,1.89276,1.8856,1.89288,1.89283,1.89241
+rolex,insert-only,7.06654,1.17809,1.17811,1.17585,1.17815,1.17824,1.1781
+rolex,update-only,7.901050000000001,1.31637,1.31613,1.31677,1.31702,1.31701,1.31775
+rolex,scan-only,3.3808359999999995,0.563909,0.563831,0.561675,0.563897,0.563796,0.563728
+dlsm,ycsb-c,0.0
+dlsm,insert-only,0.0
+dlsm,update-only,0.0
+dlsm,scan-only,0.0
+chime,ycsb-c,41.53806999999999,6.68784,6.88953,7.01766,6.90815,7.15323,6.88166
+chime,insert-only,7.44403,1.2343,1.24395,1.2436,1.24482,1.23669,1.24067
+chime,update-only,18.59094,3.09973,3.08964,3.09549,3.09294,3.10763,3.10551
+chime,scan-only,2.6964639999999997,0.44428,0.452267,0.447103,0.448102,0.45074,0.453972
 ```
+
+该实验结果对应论文中的Fig12中的瓶颈实验结果，为了快速进行实验的验证，我们仅提供了瓶颈性能（最大线程数量下的各basline的各负载性能，对应图中标红框内的数据点，转换为了柱状图）
+
+原文中的overall实验如图所示，红框内为simple实验输出的实验数据，对应最大线程数量下的各basline的各负载性能
+
+![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
+
+输出的柱状图如下
+
+<img src=".\AE_INSTRUCTION.assets\image-20250617173803989.png" alt="image-20250617173803989" style="zoom: 25%;" />
 
 如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行
 
 - 协程判定退出的时候，会存在一些卡住的情况？还是server掉了
+
+```
+nohup: ignoring input
+---------- Phase 0: Check script running status ----------
+Script started at: Tue 17 Jun 2025 01:41:34 AM UTC
+This script has not been run before, starting the execution...
+---------- Phase 1: Run simple experiment for each baseline ----------
+Running experiment for DMTree
+Finished DMTree
+DMTree's results are output to /home/aefast26/aefast26/simple.output
+Time after DMTree: Tue 17 Jun 2025 02:12:27 AM UTC, Elapsed time: 30.88 minutes
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for FPTree
+Finished FPTree
+FPTree's results are output to /home/aefast26/aefast26/simple.output
+Time after FPTree: Tue 17 Jun 2025 02:51:18 AM UTC, Elapsed time: 1.16 hours
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for Sherman
+Finished Sherman
+Sherman's results are output to /home/aefast26/aefast26/simple.output
+Time after Sherman: Tue 17 Jun 2025 03:58:20 AM UTC, Elapsed time: 2.27 hours
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for SMART
+Finished SMART
+SMART's results are output to /home/aefast26/aefast26/simple.output
+Time after SMART: Tue 17 Jun 2025 05:26:09 AM UTC, Elapsed time: 49.21 minutes
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for ROLEX
+Finished ROLEX
+ROLEX's results are output to /home/aefast26/aefast26/simple.output
+Time after ROLEX: Tue 17 Jun 2025 06:17:24 AM UTC, Elapsed time: 1.67 hours
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for CHIME
+Finished CHIME
+CHIME's results are output to /home/aefast26/aefast26/simple.output
+Time after CHIME: Tue 17 Jun 2025 07:03:30 AM UTC, Elapsed time: 2.44 hours
+Transaction throughput data has been saved to simple_results.csv
+Running experiment for dLSM
+
+```
 
 ### Overall system analysis (Exp#11~14 in our paper)
 

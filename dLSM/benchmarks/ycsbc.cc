@@ -580,8 +580,11 @@ int main(const int argc, const char *argv[])
     perload_ops = 1000000000;
     tran_ops = 100000000;
 
+    all_keys.clear();
     if(!loadKeysFromFile("entry.data")) {
         saveKeysToFile("entry.data");
+        all_keys.clear();
+        assert(loadKeysFromFile("entry.data"));
     }
 
 	num_threads = stoi(argv[1]);
