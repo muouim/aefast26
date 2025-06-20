@@ -8,9 +8,9 @@ from matplotlib import rcParams, font_manager
 font_prop = font_manager.FontProperties(family='DejaVu Serif')
 rcParams['font.family'] = font_prop.get_name()
 
-def runtime():
+def runtime(distribution):
     # Load the CSV file with performance data
-    df = pd.read_csv('simple_results.csv')
+    df = pd.read_csv(f'simple_results_{distribution}.csv')
 
     # Define the baseline order and workloads to plot
     baselines = ["sherman", "dlsm", "rolex", "smart", "chime", "dmtree"]
@@ -83,9 +83,12 @@ def runtime():
     ax.set_axisbelow(True)
     plt.tight_layout()
 
-    # Save the figure to PDF
-    plt.savefig('ycsb_zipfian.pdf')
-    # plt.show()  # Uncomment if you want to display the plot
+    # Save the figure to a file named by distribution
+    pdf_name = f'ycsb_{distribution}.pdf'
+    plt.savefig(pdf_name)
+    print(f"[✓] Saved plot to {pdf_name}")
+    # plt.show()
 
 if __name__ == '__main__':
-    runtime()
+    runtime('zipfian')
+    runtime('uniform')

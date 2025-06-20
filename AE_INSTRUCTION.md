@@ -13,11 +13,13 @@ We claim that the results might differ from those in our paper due to various fa
 * We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted a document-based reservation system along with an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
 * Additionally, to avoid excessive redundant testing, we will indicate which experiments have already been executed and have results available. It will be up to the AEC to decide whether to rerun those parts.
 
-## Environment setup (~20 minutes)
+## Environment setup (~15 minutes)
 
 We provide scripts to set up the environment for the evaluation, including cloning the code repository and copying and compiling it across multiple cluster nodes. The scripts are tested on Ubuntu 20.04 LTS. 
 
 **Step 1:** Clone the code repository `aefast26`.
+
+- Due to potential network fluctuations, the clone operation might require a few retries to complete successfully.
 
 ```shell
 git clone https://github.com/muouim/aefast26.git
@@ -76,7 +78,7 @@ For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized
 
 ### Simple experiment (For quick verification)
 
-#### Exp#0: Simple experiment (~ 6 hours)
+#### Exp#0: Simple experiment (~ 10 hours)
 
 We provide this simple experiment to verify our main experimental results quickly: **TODO: DMTree provides XXX...... similar performance compared to Cassandra while significantly reducing hot-tier storage overhead.** Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
 
@@ -84,6 +86,11 @@ You can run this simple experiment via the following command:
 
 ```shell
 bash run_simple.sh
+```
+
+Alternatively, you may consider running it in the background to avoid keeping the terminal window open for an extended period.
+
+```shell
 nohup bash run_simple.sh >run_simple.output 2>&1 &
 ```
 
@@ -94,49 +101,47 @@ To prevent repeated experiments and concurrent execution from disrupting the run
 - If the script has already been executed, a message will prompt: "`Simple experiment is complete, no need to run the script again.`".
 - If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/simple_exp.flag` the reset the simple experiment status.
 
-The results will be output in the file `simple_results.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+The results will be output in the file `simple_results_uniform.csv` and `simple_results_zipfian.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
 
 ```shell
 Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
-dmtree,ycsb-c,53.10896,9.01745,8.88033,8.3974,8.90831,9.18188,8.72359
-dmtree,insert-only,26.03086,4.22692,4.49647,4.2974,4.29571,4.43153,4.28283
-dmtree,update-only,29.37954,4.88428,4.99175,4.52919,5.08371,5.05395,4.83666
-dmtree,scan-only,3.419791,0.56917,0.571074,0.567664,0.570717,0.570537,0.570629
-fptree,ycsb-c,26.43315,4.33411,4.39609,4.42018,4.4047,4.4433,4.43477
-fptree,insert-only,14.01274,2.32656,2.35896,2.32702,2.33644,2.33624,2.32752
-fptree,update-only,14.837250000000001,2.45573,2.47846,2.46987,2.47413,2.47883,2.48023
-fptree,scan-only,2.660171,0.44338,0.443395,0.442956,0.443469,0.443526,0.443445
-sherman,ycsb-c,9.808539999999999,1.63502,1.6351,1.63325,1.63514,1.63513,1.6349
-sherman,insert-only,5.976302,0.997505,0.997568,0.996693,0.996444,0.994714,0.993378
-sherman,update-only,1.849818,0.308353,0.307522,0.30745,0.308783,0.308824,0.308886
-sherman,scan-only,2.989694,0.498344,0.498363,0.497923,0.498349,0.498357,0.498358
-smart,ycsb-c,52.60434,7.05895,9.17384,8.28245,9.30797,9.43038,9.35075
-smart,insert-only,11.144329999999998,1.76615,1.97517,1.42142,1.85197,2.14946,1.98016
-smart,update-only,24.482090000000003,3.62905,4.24562,4.02303,4.15574,4.1914,4.23725
-smart,scan-only,1.1028170000000002,0.183401,0.185141,0.182591,0.183932,0.184405,0.183347
-rolex,ycsb-c,11.34924,1.89276,1.89276,1.8856,1.89288,1.89283,1.89241
-rolex,insert-only,7.06654,1.17809,1.17811,1.17585,1.17815,1.17824,1.1781
-rolex,update-only,7.901050000000001,1.31637,1.31613,1.31677,1.31702,1.31701,1.31775
-rolex,scan-only,3.3808359999999995,0.563909,0.563831,0.561675,0.563897,0.563796,0.563728
-dlsm,ycsb-c,0.0
-dlsm,insert-only,0.0
-dlsm,update-only,0.0
-dlsm,scan-only,0.0
-chime,ycsb-c,41.53806999999999,6.68784,6.88953,7.01766,6.90815,7.15323,6.88166
-chime,insert-only,7.44403,1.2343,1.24395,1.2436,1.24482,1.23669,1.24067
-chime,update-only,18.59094,3.09973,3.08964,3.09549,3.09294,3.10763,3.10551
-chime,scan-only,2.6964639999999997,0.44428,0.452267,0.447103,0.448102,0.45074,0.453972
+dmtree,ycsb-c,53.32453,8.6159,9.12646,8.8498,8.79755,8.8378,9.09702
+dmtree,insert-only,26.472190000000005,4.38358,4.7043,4.16385,4.21258,4.66381,4.34407
+dmtree,update-only,29.65105,4.97043,4.96518,4.62563,4.88146,5.09017,5.11818
+dmtree,scan-only,3.4183529999999998,0.56681,0.571155,0.568142,0.570995,0.570754,0.570497
+fptree,ycsb-c,26.4043,4.40051,4.4354,4.38076,4.40077,4.38338,4.40348
+fptree,insert-only,14.010290000000001,2.33336,2.35963,2.30048,2.33775,2.34299,2.33608
+fptree,update-only,16.26618,2.71728,2.71469,2.65796,2.71978,2.72619,2.73028
+fptree,scan-only,2.6468520000000004,0.440922,0.441329,0.440894,0.441491,0.441023,0.441193
+sherman,ycsb-c,9.82585,1.63857,1.63852,1.63289,1.63897,1.63831,1.63859
+sherman,insert-only,5.978708,0.998049,0.997185,0.994785,0.999086,0.994643,0.99496
+sherman,update-only,1.883737,0.314246,0.312869,0.313135,0.313904,0.314071,0.315512
+sherman,scan-only,2.9982810000000004,0.499906,0.499891,0.498906,0.499897,0.499846,0.499835
+smart,ycsb-c,52.73223,7.37058,9.04472,7.81512,9.12709,9.69932,9.6754
+smart,insert-only,11.291780000000001,1.72764,1.91582,1.55416,1.88719,2.13127,2.0757
+smart,update-only,24.878660000000004,3.64825,4.31508,3.94635,4.24777,4.3604,4.36081
+smart,scan-only,1.102827,0.184169,0.18495,0.182623,0.182861,0.184817,0.183407
+rolex,ycsb-c,11.33694,1.8892,1.88971,1.88884,1.88942,1.89016,1.88961
+rolex,insert-only,7.071890000000001,1.17945,1.17935,1.17467,1.17958,1.17948,1.17936
+rolex,update-only,7.929880000000001,1.32325,1.32374,1.31062,1.32404,1.32429,1.32394
+rolex,scan-only,3.3806950000000002,0.563801,0.563813,0.561656,0.563835,0.563788,0.563802
+dlsm,ycsb-c,18.21639,3.0587,2.99944,2.91436,3.21047,2.9449,3.08852
+dlsm,insert-only,5.38723,0.927232,0.884041,0.837977,0.788737,0.935613,1.01363
+dlsm,update-only,42.774730000000005,3.7854,3.6829,9.31849,5.97053,9.91391,10.1035
+dlsm,scan-only,0.779036,0.132139,0.132728,0.125136,0.127841,0.130415,0.130777
+chime,ycsb-c,41.814569999999996,6.80939,7.01565,6.9761,6.94508,7.1876,6.88075
+chime,insert-only,7.434680000000001,1.23387,1.24365,1.24164,1.2415,1.23394,1.24008
+chime,update-only,18.70113,3.12817,3.10721,3.04182,3.12771,3.15147,3.14475
+chime,scan-only,2.723014,0.449037,0.455628,0.453864,0.45466,0.453082,0.456743
 ```
 
-该实验结果对应论文中的Fig12中的瓶颈实验结果，为了快速进行实验的验证，我们仅提供了瓶颈性能（最大线程数量下的各basline的各负载性能，对应图中标红框内的数据点，转换为了柱状图）
+The output experimental results correspond to those presented in Figures 11 and 12 of the original paper. To enable quick experimental verification, we only provide the bottleneck performance—**i.e., the performance of each baseline under each workload at the maximum thread count**—which corresponds to the **red-boxed data points in the figures** and has been converted into bar charts.
 
-原文中的overall实验如图所示，红框内为simple实验输出的实验数据，对应最大线程数量下的各basline的各负载性能
+As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
 
-![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
+The experimental results in the file `simple_results.csv` are converted into bar charts, as shown in the figure.
 
-输出的柱状图如下
-
-<img src=".\AE_INSTRUCTION.assets\image-20250617173803989.png" alt="image-20250617173803989" style="zoom: 25%;" />
+<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250620115236555.png" alt="image-20250620115236555" style="zoom: 33%;" />
 
 如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行
 
@@ -145,41 +150,128 @@ chime,scan-only,2.6964639999999997,0.44428,0.452267,0.447103,0.448102,0.45074,0.
 ```
 nohup: ignoring input
 ---------- Phase 0: Check script running status ----------
-Script started at: Tue 17 Jun 2025 01:41:34 AM UTC
+Script started at: Tue 17 Jun 2025 05:18:53 PM UTC
 This script has not been run before, starting the execution...
 ---------- Phase 1: Run simple experiment for each baseline ----------
+=============================
 Running experiment for DMTree
 Finished DMTree
 DMTree's results are output to /home/aefast26/aefast26/simple.output
-Time after DMTree: Tue 17 Jun 2025 02:12:27 AM UTC, Elapsed time: 30.88 minutes
+Time after DMTree: Tue 17 Jun 2025 05:51:04 PM UTC
+ - Elapsed since script started: 32.18 minutes
+ - Time for this project: 32.18 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for FPTree
 Finished FPTree
 FPTree's results are output to /home/aefast26/aefast26/simple.output
-Time after FPTree: Tue 17 Jun 2025 02:51:18 AM UTC, Elapsed time: 1.16 hours
+Time after FPTree: Tue 17 Jun 2025 06:29:40 PM UTC
+ - Elapsed since script started: 1.17 hours
+ - Time for this project: 38.60 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for Sherman
 Finished Sherman
 Sherman's results are output to /home/aefast26/aefast26/simple.output
-Time after Sherman: Tue 17 Jun 2025 03:58:20 AM UTC, Elapsed time: 2.27 hours
+Time after Sherman: Tue 17 Jun 2025 07:36:40 PM UTC
+ - Elapsed since script started: 2.29 hours
+ - Time for this project: 1.11 hours
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for SMART
 Finished SMART
 SMART's results are output to /home/aefast26/aefast26/simple.output
-Time after SMART: Tue 17 Jun 2025 05:26:09 AM UTC, Elapsed time: 49.21 minutes
+Time after SMART: Tue 17 Jun 2025 08:26:05 PM UTC
+ - Elapsed since script started: 3.12 hours
+ - Time for this project: 49.36 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+Successfully parsed all workloads for baseline: smart
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for ROLEX
 Finished ROLEX
 ROLEX's results are output to /home/aefast26/aefast26/simple.output
-Time after ROLEX: Tue 17 Jun 2025 06:17:24 AM UTC, Elapsed time: 1.67 hours
+Time after ROLEX: Tue 17 Jun 2025 09:17:36 PM UTC
+ - Elapsed since script started: 3.97 hours
+ - Time for this project: 51.46 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+Successfully parsed all workloads for baseline: smart
+Successfully parsed all workloads for baseline: rolex
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for CHIME
 Finished CHIME
 CHIME's results are output to /home/aefast26/aefast26/simple.output
-Time after CHIME: Tue 17 Jun 2025 07:03:30 AM UTC, Elapsed time: 2.44 hours
+Time after CHIME: Tue 17 Jun 2025 10:03:38 PM UTC
+ - Elapsed since script started: 4.74 hours
+ - Time for this project: 45.98 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+Successfully parsed all workloads for baseline: smart
+Successfully parsed all workloads for baseline: rolex
+Successfully parsed all workloads for baseline: chime
+======================================
 Transaction throughput data has been saved to simple_results.csv
+======================================
+=============================
 Running experiment for dLSM
-
+Finished dLSM
+dLSM's results are output to /home/aefast26/aefast26/simple.output
+Time after dLSM: Fri 20 Jun 2025 03:44:01 AM UTC
+ - Elapsed since script started: 26.56 minutes
+ - Time for this project: 26.56 minutes
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+Successfully parsed all workloads for baseline: smart
+Successfully parsed all workloads for baseline: rolex
+Successfully parsed all workloads for baseline: dlsm
+Successfully parsed all workloads for baseline: chime
+======================================
+Transaction throughput data has been saved to simple_results.csv
+======================================
+---------- Phase 2: Organize and output all the results ----------
+========== Start Parsing ==========
+Successfully parsed all workloads for baseline: dmtree
+Successfully parsed all workloads for baseline: fptree
+Successfully parsed all workloads for baseline: sherman
+Successfully parsed all workloads for baseline: smart
+Successfully parsed all workloads for baseline: rolex
+Successfully parsed all workloads for baseline: dlsm
+Successfully parsed all workloads for baseline: chime
+======================================
+Transaction throughput data has been saved to simple_results.csv
+======================================
+Script completed at: Fri 20 Jun 2025 03:44:08 AM UTC, Total elapsed time: 5.2 hours
+---------- All phases completed. Output saved to /home/aefast26/aefast26/simple.output ----------
 ```
 
 ### Overall system analysis (Exp#11~14 in our paper)
@@ -324,3 +416,4 @@ bash scripts/exp/Exp9-consistency.sh
 ```shell
 bash scripts/exp/Exp10-clients.sh
 ```
+

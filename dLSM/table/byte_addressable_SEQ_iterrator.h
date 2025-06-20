@@ -35,11 +35,11 @@ class ByteAddressableSEQIterator :public Iterator{
 
   bool Valid() const override { return valid_; }
   Slice key() const override {
-    // assert(Valid());
+    assert(Valid());
     return key_.GetKey();
   }
   Slice value() const override {
-    // assert(Valid());
+    assert(Valid());
     return value_;
   }
   Status status() const override {

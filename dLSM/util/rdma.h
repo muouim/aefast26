@@ -77,8 +77,9 @@ inline void* hugePageAlloc(size_t size) {
 	void* res = mmap(NULL, size, PROT_READ | PROT_WRITE,
 	                 MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
 	if(res == MAP_FAILED) {
-        res = new char[size];
+		printf("mmap failed!\n");
 	}
+
 	return res;
 }
 enum Chunk_type {Message=1, Version_edit=2, IndexChunk=3, IndexChunk_Small=4, FilterChunk=5, FlushBuffer=6, DataChunk=7, No_Use_Default_chunk=8};

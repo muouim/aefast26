@@ -366,7 +366,8 @@ void do_transaction(int th_id, Slice &key, RandomGenerator &a)
             iter->Next();
             count++;
         }
-        delete iter;
+        if(iter->Valid())
+            delete iter;
     }
     if (record.type == util::READMODIFYWRITE)
     {
@@ -580,11 +581,8 @@ int main(const int argc, const char *argv[])
     perload_ops = 1000000000;
     tran_ops = 100000000;
 
-    all_keys.clear();
     if(!loadKeysFromFile("entry.data")) {
         saveKeysToFile("entry.data");
-        all_keys.clear();
-        assert(loadKeysFromFile("entry.data"));
     }
 
 	num_threads = stoi(argv[1]);
@@ -721,8 +719,7 @@ int main(const int argc, const char *argv[])
     }
     double duration = timer.End();
 
-    sleep(30);
-    // rdma_mg->sync_with_computes_Cside();
+    rdma_mg->sync_with_computes_Cside();
 
 	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;

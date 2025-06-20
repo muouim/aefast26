@@ -20,9 +20,15 @@ for project in $baselines; do
     fi
     
     # Create a new build directory, run cmake and make
-    mkdir build && cd build && cmake .. && make -j
-    cd ..
-    cd ..
+    mkdir build && cd build
+
+    if [ "$project" = "dLSM" ]; then
+        cmake -DWITH_GFLAGS=1 -DCMAKE_BUILD_TYPE=Release .. && make Server db_bench TimberSaw ycsbc -j
+    else
+        cmake .. && make -j
+    fi
+
+    cd ../..
 done
 
-echo "Finished"
+echo "Finished building all baselines."

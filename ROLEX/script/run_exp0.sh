@@ -8,7 +8,7 @@ ae_data_dir="$HOME/aefast26/AE/Data"
 
 workloads="ycsb-c insert-only update-only scan-only"
 threads="72"
-distribution="zipfian"
+distribution="zipfian uniform"
 node="6 5 4 2 1"
 memory_nodes="3"
 

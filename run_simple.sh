@@ -94,6 +94,7 @@ done
 echo "---------- Phase 2: Organize and output all the results ----------"
 
 python3 $base_dir/AE/print_exp0.py
+python3 $base_dir/AE/plot_exp0.py
 
 # Mark script as completed
 echo "completed" > "$status_file"

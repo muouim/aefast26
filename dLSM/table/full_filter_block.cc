@@ -191,9 +191,8 @@ FullFilterBlockReader::FullFilterBlockReader(
   uint32_t len_with_meta = static_cast<uint32_t>(contents.size());
   if (len_with_meta <= 5) {
     // filter is empty or broken. Treat like zero keys added.
-    std::cerr << "corrupt bloom filter1" << std::endl;
-    return;
-}
+    std::cerr << "corrupt bloom filter" << std::endl;
+  }
 
   // Legacy Bloom filter data:
   //             0 +-----------------------------------+
@@ -219,14 +218,14 @@ FullFilterBlockReader::FullFilterBlockReader(
     // (or reserved for future use)
     if (num_probes_ == -1) {
       // Marker for newer Bloom implementations
-      std::cerr << "corrupt bloom filter2" << std::endl;
+      std::cerr << "corrupt bloom filter" << std::endl;
       // exit(1);
       return;
 
     }
     // otherwise
     // Treat as zero probes (always FP) for now.
-    std::cerr << "corrupt bloom filter3" << std::endl;
+    std::cerr << "corrupt bloom filter" << std::endl;
     // exit(1);
     return;
   }
