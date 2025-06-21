@@ -3,11 +3,12 @@
 trap 'kill $(jobs -p)' SIGINT
 
 # Define the directory as a variable
-dm_tree_dir="$HOME/aefast26/Sherman"
+dm_tree_dir="$HOME/aefast26/FPTree"
 ae_data_dir="$HOME/aefast26/AE/Data"
 
-workloads="ycsb-c insert-only update-only scan-only"
-threads="72 1 6 12 24 36 48 60"
+# Modified workloads to YCSB A-F
+workloads="ycsb-a ycsb-b ycsb-c ycsb-d ycsb-e ycsb-f"
+threads="72"
 distribution="zipfian uniform"
 node="6 5 4 2 1"
 memory_nodes="3"
@@ -55,12 +56,12 @@ for dis in $distribution; do
             for n in $node; do
                 sleep 2
                 echo "Running ycsbc on compute node $n"
-                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_sherman_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
+                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_fptree_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
             done
             
             sleep 2
             echo "Running ycsbc on compute node 7"
-            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_sherman_$file_name-$dis-thread$thread-coro4.txt 2>&1;
+            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_fptree_$file_name-$dis-thread$thread-coro4.txt 2>&1;
             echo "============================="
             
             # Run kill_server.sh script on memory nodes
@@ -73,10 +74,10 @@ for dis in $distribution; do
             for n in $node; do
                 echo "Copying data from node$n to node7's AE/Data directory"
                 # Use scp to copy data files from each compute node to node7's AE/Data directory
-                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_sherman_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_fptree_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             done
             echo "Copying local data from node7 to node7's AE/Data directory"
-            cp "$dm_tree_dir/data/node7-exp0_sherman_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+            cp "$dm_tree_dir/data/node7-exp0_fptree_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             echo "============================="
 
             echo "Finished $dis-$file_name with thread $thread"
@@ -87,6 +88,6 @@ for dis in $distribution; do
 done
 
 echo "============================="
-echo "All Sherman tasks are finished"
-echo "All experiment results are saved in: $dm_tree_dir/data"
+echo "All FPTree tasks are finished"
+echo "All YCSB experiment results are saved in: $dm_tree_dir/data"
 echo "============================="

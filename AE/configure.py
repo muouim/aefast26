@@ -7,7 +7,6 @@ Initialize configuration:
    For ROLEX, force dsmSize = 80 and modelRegionSize = 4 * GB.
    For SMART, force dsmSize = 145.
    Otherwise, set dsmSize = 110.
-   Additionally, modify `#define HASH_TABLE_SIZE` in `CHIME/include/Hash.h` to 200000.
 2. If node_id >= 0 (compute node), modify `COMPUTE_ID` in `ycsbc.cc` in some baselines (e.g., dLSM).
 """
 

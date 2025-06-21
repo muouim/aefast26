@@ -3,11 +3,12 @@
 trap 'kill $(jobs -p)' SIGINT
 
 # Define the directory as a variable
-dm_tree_dir="$HOME/aefast26/SMART"
+dm_tree_dir="$HOME/aefast26/ROLEX"
 ae_data_dir="$HOME/aefast26/AE/Data"
 
-workloads="ycsb-c insert-only update-only scan-only"
-threads="72 1 6 12 24 36 48 60"
+# Workloads updated to standard YCSB A-F
+workloads="ycsb-a ycsb-b ycsb-c ycsb-d ycsb-e ycsb-f"
+threads="72"
 distribution="zipfian uniform"
 node="6 5 4 2 1"
 memory_nodes="3"
@@ -30,21 +31,31 @@ fi
 # Configure hugepages on compute and memory nodes
 echo "---------- Configuring hugepages on compute and memory nodes ----------"
 for n in $memory_nodes; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=82768'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=68768'; exit"
 done
 
-# Reduce hugepage count on compute nodes due to SMART's high temporary memory usage.
 for n in $node; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=3268'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=12768'; exit"
+    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
 done
-sudo sysctl -w vm.nr_hugepages=3268
+sudo sysctl -w vm.nr_hugepages=12768
+rm -f "$dm_tree_dir/build/load_keys.data"
 
 for dis in $distribution; do
     for thread in $threads; do
         for file_name in $workloads; do
             echo "============================="
             echo "Starting run for $dis-$file_name with thread $thread"
-            
+
+            # Use temporary file load_keys.data to cache loaded keys for training workloads
+            if [ "$file_name" = "ycsb-e" ]; then
+                echo "Cleaning load_keys.data on compute nodes"
+                for n in $node; do
+                    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+                done
+                rm -f "$dm_tree_dir/build/load_keys.data"
+            fi
+
             # Run script on memory nodes
             echo "Running server process on memory nodes"
             ssh skv-node3 "/bin/bash -c 'cd $dm_tree_dir/script && bash restart_memc.sh'; exit;"
@@ -56,14 +67,14 @@ for dis in $distribution; do
             for n in $node; do
                 sleep 2
                 echo "Running ycsbc on compute node $n"
-                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_smart_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
+                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
             done
             
             sleep 2
             echo "Running ycsbc on compute node 7"
-            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_smart_$file_name-$dis-thread$thread-coro4.txt 2>&1;
+            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt 2>&1;
             echo "============================="
-            
+
             # Run kill_server.sh script on memory nodes
             echo "Kill server process on memory nodes"
             ssh skv-node3 "/bin/bash -c 'cd $dm_tree_dir/script && bash kill_server.sh'; exit;"
@@ -74,11 +85,20 @@ for dis in $distribution; do
             for n in $node; do
                 echo "Copying data from node$n to node7's AE/Data directory"
                 # Use scp to copy data files from each compute node to node7's AE/Data directory
-                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_smart_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             done
             echo "Copying local data from node7 to node7's AE/Data directory"
-            cp "$dm_tree_dir/data/node7-exp0_smart_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+            cp "$dm_tree_dir/data/node7-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             echo "============================="
+
+            # Clear load_keys.data again for ycsb-e (safety)
+            if [ "$file_name" = "ycsb-e" ]; then
+                echo "Cleaning load_keys.data on compute nodes"
+                for n in $node; do
+                    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+                done
+                rm -f "$dm_tree_dir/build/load_keys.data"
+            fi
 
             echo "Finished $dis-$file_name with thread $thread"
             wait
@@ -88,6 +108,6 @@ for dis in $distribution; do
 done
 
 echo "============================="
-echo "All SMART tasks are finished"
-echo "All experiment results are saved in: $dm_tree_dir/data"
+echo "All ROLEX tasks are finished"
+echo "All YCSB experiment results are saved in: $dm_tree_dir/data"
 echo "============================="

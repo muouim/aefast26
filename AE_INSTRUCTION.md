@@ -6,6 +6,10 @@ Here are the detailed instructions to perform the same experiments in our paper.
 
 We claim that the results might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect DMTree to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
 
+## Artifact Overview
+
+
+
 ## Cluster setup
 
 * We require **six compute nodes** and **one memory node** in AE.
@@ -37,7 +41,7 @@ To prevent repeated compilation and concurrent execution from disrupting the est
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
 - If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
 - If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
-- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `rm /tmp/build_ae.flag` the reset the environment setup status.
+- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `rm /tmp/build_ae.flag` to reset the environment setup status.
 
 ## Evaluations
 
@@ -76,9 +80,9 @@ Only one round: 1883.00
 
 For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized similarly to the summarized performance results. Again, depending on the number of running rounds conducted, the output formats include options such as a single-round summary (run experiment with one round) or more comprehensive data sets featuring average, maximum, and minimum values (run experiment with 2~4 rounds), as well as average values with a 95% Student-T distribution confidence interval (run experiment more than five rounds). We provide examples of the summarized results of operation breakdown, recovery time cost, and resource usage in each related evaluation.
 
-### Simple experiment (For quick verification)
+### Micro experiment (For quick verification)
 
-#### Exp#0: Simple experiment (~ 10 hours)
+#### Exp#11-12: Performance with Micro-benchmarks (~11 hours)
 
 We provide this simple experiment to verify our main experimental results quickly: **TODO: DMTree provides XXX...... similar performance compared to Cassandra while significantly reducing hot-tier storage overhead.** Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
 
@@ -99,321 +103,123 @@ To prevent repeated experiments and concurrent execution from disrupting the run
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
 - If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
 - If the script has already been executed, a message will prompt: "`Simple experiment is complete, no need to run the script again.`".
-- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/simple_exp.flag` the reset the simple experiment status.
+- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/simple_exp.flag` to reset the simple experiment status.
 
-The results will be output in the file `simple_results_uniform.csv` and `simple_results_zipfian.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+The results will be output in the file `simple_results_uniform.csv` and `simple_results_zipfian.csv`. 并且，我们绘制了柱状图`ycsb_uniform.pdf`和`ycsb_zipfian.pdf`.
+
+Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+
+**simple_results_uniform.csv**
+
+```
+Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
+dmtree,ycsb-c,49.69586,8.3214,8.4839,8.39724,8.07157,8.22343,8.19832
+dmtree,insert-only,26.372739999999997,4.4403,4.54854,4.17407,4.23682,4.60402,4.36899
+dmtree,update-only,31.795920000000002,5.27421,5.29733,5.28315,5.34774,5.36419,5.2293
+dmtree,scan-only,3.446158,0.572914,0.575549,0.572203,0.575403,0.57504,0.575049
+fptree,ycsb-c,23.714789999999997,3.96312,3.97181,3.9583,3.96514,3.95907,3.89735
+fptree,insert-only,13.52334,2.22194,2.25822,2.24564,2.27178,2.27274,2.25302
+fptree,update-only,13.69716,2.28294,2.28727,2.27213,2.285,2.28717,2.28265
+fptree,scan-only,2.654987,0.442648,0.442568,0.442031,0.442587,0.442552,0.442601
+sherman,ycsb-c,9.81188,1.63574,1.63579,1.6328,1.63613,1.63577,1.63565
+sherman,insert-only,5.981216,0.998046,0.998478,0.995345,0.999298,0.994832,0.995217
+sherman,update-only,8.77102,1.46285,1.46291,1.45914,1.46308,1.46301,1.46003
+sherman,scan-only,2.990589,0.498535,0.498477,0.497884,0.498578,0.49856,0.498555
+smart,ycsb-c,48.28557,6.58257,9.18799,6.40419,8.93014,8.11444,9.06624
+smart,insert-only,11.53051,1.71435,1.97921,1.96133,1.91434,2.05267,1.90861
+smart,update-only,21.919349999999998,3.40476,3.71655,3.68659,3.6647,3.71745,3.7293
+smart,scan-only,1.041088,0.173086,0.174587,0.172613,0.173529,0.174248,0.173025
+rolex,ycsb-c,10.17066,1.69627,1.69603,1.68939,1.69627,1.69641,1.69629
+rolex,insert-only,7.06437,1.17714,1.1776,1.177,1.17762,1.1775,1.17751
+rolex,update-only,7.07585,1.17991,1.17994,1.17607,1.17998,1.18003,1.17992
+rolex,scan-only,3.391118,0.565502,0.565522,0.563582,0.565517,0.565492,0.565503
+dlsm,ycsb-c,18.36991,3.21127,2.92119,3.12477,3.025,3.02454,3.06314
+dlsm,insert-only,4.715047,0.696512,0.883874,0.771909,0.779352,0.754986,0.828414
+dlsm,update-only,23.23445,2.02157,2.0664,10.2327,2.1009,1.9844,4.82848
+dlsm,scan-only,0.7661690000000001,0.132276,0.131247,0.118661,0.136749,0.130517,0.116719
+chime,ycsb-c,31.38408,5.49949,3.81008,5.37363,5.50274,5.70717,5.49097
+chime,insert-only,7.435649999999999,1.23096,1.24667,1.23782,1.24351,1.23578,1.24091
+chime,update-only,18.45321,3.08806,2.99077,3.08156,3.09312,3.10516,3.09454
+chime,scan-only,2.538482,0.422086,0.405211,0.419598,0.428614,0.43807,0.424903
+```
+
+**simple_results_zipfian.csv**
 
 ```shell
 Index,Workload,Total,Node1,Node2,Node4,Node5,Node6,Node7
-dmtree,ycsb-c,53.32453,8.6159,9.12646,8.8498,8.79755,8.8378,9.09702
-dmtree,insert-only,26.472190000000005,4.38358,4.7043,4.16385,4.21258,4.66381,4.34407
-dmtree,update-only,29.65105,4.97043,4.96518,4.62563,4.88146,5.09017,5.11818
-dmtree,scan-only,3.4183529999999998,0.56681,0.571155,0.568142,0.570995,0.570754,0.570497
-fptree,ycsb-c,26.4043,4.40051,4.4354,4.38076,4.40077,4.38338,4.40348
-fptree,insert-only,14.010290000000001,2.33336,2.35963,2.30048,2.33775,2.34299,2.33608
-fptree,update-only,16.26618,2.71728,2.71469,2.65796,2.71978,2.72619,2.73028
-fptree,scan-only,2.6468520000000004,0.440922,0.441329,0.440894,0.441491,0.441023,0.441193
-sherman,ycsb-c,9.82585,1.63857,1.63852,1.63289,1.63897,1.63831,1.63859
-sherman,insert-only,5.978708,0.998049,0.997185,0.994785,0.999086,0.994643,0.99496
-sherman,update-only,1.883737,0.314246,0.312869,0.313135,0.313904,0.314071,0.315512
-sherman,scan-only,2.9982810000000004,0.499906,0.499891,0.498906,0.499897,0.499846,0.499835
-smart,ycsb-c,52.73223,7.37058,9.04472,7.81512,9.12709,9.69932,9.6754
-smart,insert-only,11.291780000000001,1.72764,1.91582,1.55416,1.88719,2.13127,2.0757
-smart,update-only,24.878660000000004,3.64825,4.31508,3.94635,4.24777,4.3604,4.36081
-smart,scan-only,1.102827,0.184169,0.18495,0.182623,0.182861,0.184817,0.183407
-rolex,ycsb-c,11.33694,1.8892,1.88971,1.88884,1.88942,1.89016,1.88961
-rolex,insert-only,7.071890000000001,1.17945,1.17935,1.17467,1.17958,1.17948,1.17936
-rolex,update-only,7.929880000000001,1.32325,1.32374,1.31062,1.32404,1.32429,1.32394
-rolex,scan-only,3.3806950000000002,0.563801,0.563813,0.561656,0.563835,0.563788,0.563802
-dlsm,ycsb-c,18.21639,3.0587,2.99944,2.91436,3.21047,2.9449,3.08852
-dlsm,insert-only,5.38723,0.927232,0.884041,0.837977,0.788737,0.935613,1.01363
-dlsm,update-only,42.774730000000005,3.7854,3.6829,9.31849,5.97053,9.91391,10.1035
-dlsm,scan-only,0.779036,0.132139,0.132728,0.125136,0.127841,0.130415,0.130777
-chime,ycsb-c,41.814569999999996,6.80939,7.01565,6.9761,6.94508,7.1876,6.88075
-chime,insert-only,7.434680000000001,1.23387,1.24365,1.24164,1.2415,1.23394,1.24008
-chime,update-only,18.70113,3.12817,3.10721,3.04182,3.12771,3.15147,3.14475
-chime,scan-only,2.723014,0.449037,0.455628,0.453864,0.45466,0.453082,0.456743
+dmtree,ycsb-c,53.14693,9.03308,9.02831,8.79015,8.48879,8.91789,8.88871
+dmtree,insert-only,26.38105,4.39275,4.49302,4.34678,4.31152,4.58725,4.24973
+dmtree,update-only,29.02227,4.05761,4.94014,4.67556,4.98945,5.11801,5.2415
+dmtree,scan-only,3.4390020000000003,0.572354,0.57411,0.570717,0.574015,0.57396,0.573846
+fptree,ycsb-c,26.38646,4.38804,4.40993,4.39224,4.39771,4.40559,4.39295
+fptree,insert-only,13.49708,2.24084,2.25663,2.24714,2.24957,2.25919,2.24371
+fptree,update-only,14.77921,2.4547,2.46837,2.43277,2.46653,2.48649,2.47035
+fptree,scan-only,2.6599909999999998,0.443154,0.443439,0.443034,0.443496,0.443498,0.44337
+sherman,ycsb-c,9.80682,1.63447,1.63479,1.63307,1.63492,1.63469,1.63488
+sherman,insert-only,5.982340999999999,0.998655,0.997865,0.995248,1.00002,0.995225,0.995328
+sherman,update-only,1.897112,0.316186,0.315484,0.314938,0.315559,0.317741,0.317204
+sherman,scan-only,3.014283,0.502456,0.50244,0.502058,0.502442,0.502452,0.502435
+smart,ycsb-c,51.152860000000004,6.86627,9.21044,7.62574,8.77758,9.3365,9.33633
+smart,insert-only,11.441650000000001,1.72969,1.95853,1.82413,2.00204,2.00797,1.91929
+smart,update-only,24.898239999999998,3.67283,4.37875,3.72425,4.30601,4.41896,4.39744
+smart,scan-only,1.049804,0.176254,0.175273,0.173624,0.174355,0.175623,0.174675
+rolex,ycsb-c,11.33306,1.88964,1.88962,1.8852,1.8896,1.88975,1.88925
+rolex,insert-only,7.06801,1.17844,1.17837,1.17615,1.1784,1.17833,1.17832
+rolex,update-only,7.893560000000001,1.31615,1.31663,1.31142,1.31661,1.31707,1.31568
+rolex,scan-only,3.3781749999999997,0.563232,0.563207,0.562062,0.563236,0.563217,0.563221
+dlsm,ycsb-c,18.03255,3.36123,2.97891,2.93221,2.90981,2.89991,2.95048
+dlsm,insert-only,5.184105,0.732869,1.00827,0.875831,0.789125,0.943514,0.834496
+dlsm,update-only,40.14341,5.20028,5.67613,6.23658,7.04943,7.73673,8.24426
+dlsm,scan-only,0.77451,0.134825,0.125945,0.124501,0.135181,0.12716,0.126898
+chime,ycsb-c,40.37225,7.14846,5.33814,7.02093,6.86335,7.13929,6.86208
+chime,insert-only,7.4409,1.23996,1.24562,1.22614,1.2461,1.23996,1.24312
+chime,update-only,18.59494,3.1023,3.0827,3.09694,3.09088,3.1103,3.11182
+chime,scan-only,2.718992,0.447759,0.455589,0.45241,0.453392,0.452061,0.457781
 ```
 
 The output experimental results correspond to those presented in Figures 11 and 12 of the original paper. To enable quick experimental verification, we only provide the bottleneck performance—**i.e., the performance of each baseline under each workload at the maximum thread count**—which corresponds to the **red-boxed data points in the figures** and has been converted into bar charts.
 
 As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
 
-The experimental results in the file `simple_results.csv` are converted into bar charts, as shown in the figure.
+The experimental results in the file `simple_results_uniform.csv` are converted into bar charts, as shown in the figure.
 
-<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250620115236555.png" alt="image-20250620115236555" style="zoom: 33%;" />
+<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250621112713219.png" alt="image-20250621112713219" style="zoom: 25%;" />
 
-如果卡住了，请取消脚本，运行如下脚本，清除各个服务器上运行的程序，并从卡住的地方尝试重新运行
+The experimental results in the file `simple_results_zipfian.csv` are converted into bar charts, as shown in the figure.
 
-- 协程判定退出的时候，会存在一些卡住的情况？还是server掉了
+<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250621112758392.png" alt="image-20250621112758392" style="zoom:25%;" />
 
-```
-nohup: ignoring input
----------- Phase 0: Check script running status ----------
-Script started at: Tue 17 Jun 2025 05:18:53 PM UTC
-This script has not been run before, starting the execution...
----------- Phase 1: Run simple experiment for each baseline ----------
-=============================
-Running experiment for DMTree
-Finished DMTree
-DMTree's results are output to /home/aefast26/aefast26/simple.output
-Time after DMTree: Tue 17 Jun 2025 05:51:04 PM UTC
- - Elapsed since script started: 32.18 minutes
- - Time for this project: 32.18 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for FPTree
-Finished FPTree
-FPTree's results are output to /home/aefast26/aefast26/simple.output
-Time after FPTree: Tue 17 Jun 2025 06:29:40 PM UTC
- - Elapsed since script started: 1.17 hours
- - Time for this project: 38.60 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for Sherman
-Finished Sherman
-Sherman's results are output to /home/aefast26/aefast26/simple.output
-Time after Sherman: Tue 17 Jun 2025 07:36:40 PM UTC
- - Elapsed since script started: 2.29 hours
- - Time for this project: 1.11 hours
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for SMART
-Finished SMART
-SMART's results are output to /home/aefast26/aefast26/simple.output
-Time after SMART: Tue 17 Jun 2025 08:26:05 PM UTC
- - Elapsed since script started: 3.12 hours
- - Time for this project: 49.36 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-Successfully parsed all workloads for baseline: smart
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for ROLEX
-Finished ROLEX
-ROLEX's results are output to /home/aefast26/aefast26/simple.output
-Time after ROLEX: Tue 17 Jun 2025 09:17:36 PM UTC
- - Elapsed since script started: 3.97 hours
- - Time for this project: 51.46 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-Successfully parsed all workloads for baseline: smart
-Successfully parsed all workloads for baseline: rolex
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for CHIME
-Finished CHIME
-CHIME's results are output to /home/aefast26/aefast26/simple.output
-Time after CHIME: Tue 17 Jun 2025 10:03:38 PM UTC
- - Elapsed since script started: 4.74 hours
- - Time for this project: 45.98 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-Successfully parsed all workloads for baseline: smart
-Successfully parsed all workloads for baseline: rolex
-Successfully parsed all workloads for baseline: chime
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-=============================
-Running experiment for dLSM
-Finished dLSM
-dLSM's results are output to /home/aefast26/aefast26/simple.output
-Time after dLSM: Fri 20 Jun 2025 03:44:01 AM UTC
- - Elapsed since script started: 26.56 minutes
- - Time for this project: 26.56 minutes
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-Successfully parsed all workloads for baseline: smart
-Successfully parsed all workloads for baseline: rolex
-Successfully parsed all workloads for baseline: dlsm
-Successfully parsed all workloads for baseline: chime
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
----------- Phase 2: Organize and output all the results ----------
-========== Start Parsing ==========
-Successfully parsed all workloads for baseline: dmtree
-Successfully parsed all workloads for baseline: fptree
-Successfully parsed all workloads for baseline: sherman
-Successfully parsed all workloads for baseline: smart
-Successfully parsed all workloads for baseline: rolex
-Successfully parsed all workloads for baseline: dlsm
-Successfully parsed all workloads for baseline: chime
-======================================
-Transaction throughput data has been saved to simple_results.csv
-======================================
-Script completed at: Fri 20 Jun 2025 03:44:08 AM UTC, Total elapsed time: 5.2 hours
----------- All phases completed. Output saved to /home/aefast26/aefast26/simple.output ----------
-```
+我们可以看到，DMTree实现了总体的最优性能（除了Zipfian的更新负载下，比dLSM要差，这也符合预期）
 
-### Overall system analysis (Exp#11~14 in our paper)
 
-#### Exp#11-#12: Performance with Micro-benchmarks (1 human minutes + ~ 20 compute-hours)
 
-*Running:*
+### YCSB experiment (Exp#14 in our paper)
+
+#### Exp#14: Performance with YCSB core workloads (-20 hours)
+
+***Running:***
+
+You can run this simple experiment via the following command:
 
 ```shell
-bash run_overall.sh
+bash run_ycsb.sh
 ```
 
-#### Exp#14: Performance with YCSB core workloads (1 human-minutes + ~ 5 compute-hours)
-
-*Running:*
+Alternatively, you may consider running it in the background to avoid keeping the terminal window open for an extended period.
 
 ```shell
-bash scripts/exp/Exp2-operations.sh
+nohup bash run_ycsb.sh >run_ycsb.output 2>&1 &
 ```
 
-#### Exp#13: Tail latency with Micro-benchmarks (1 human-minutes + ~ 5 compute-hours)
+To prevent repeated experiments and concurrent execution from disrupting the running experiments, we have implemented a tracking and checking mechanism for the simple experiment status when running the `run_ycsb.sh` script:
 
-*Running:*
+- If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
+- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
+- If the script has already been executed, a message will prompt: "`YCSB experiment is complete, no need to run the script again.`".
+- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/ycsb_exp.flag` to reset the simple experiment status.
 
-```shell
-bash scripts/exp/Exp3-breakdown.sh
-```
+***Results:*** 
 
-*Results:* These summaries are available in the `scripts/exp/` directory and can be found in the file named `Exp3-breakdown.log`. For example, the write operation breakdown result of ELECT will be output as in the example shown below. Note that the title for each metric is the same as the title in the paper.
+The results will be output in the file `ycsb_results_uniform.csv` and `ycsb_results_zipfian.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
 
-```shell
-[Breakdown info for Write] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
-WAL (unit: ms/MiB):
-Only one round: 388.95
-MemTable (unit: ms/MiB):
-Only one round: 686.65
-Flushing (unit: ms/MiB):
-Only one round: 200.79
-Compaction (unit: ms/MiB):
-Only one round: 1638.06
-Transitioning (unit: ms/MiB):
-Only one round: 259.84
-Migration (unit: ms/MiB):
-Only one round: 17.72
-...
-```
-
-### Parameter analysis (Exp#6~8 in our paper)
-
-#### Exp#4: Full-node recovery (1 human-minutes + ~ 14 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp4-recovery.sh
-```
-
-*Results:* These summaries are available in the `scripts/exp/` directory and can be found in the file named `Exp4-recovery.log`.
-
-* For ELECT, the recovery time is the time cost of retrieving the LSM-trees from the replication nodes and decoding the SSTables. The result will be output as in the example shown below.
-
-```shell
-[Exp info] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
-Total recovery time cost (unit: s):
-Average: 6653.00, Min: 6653, Max: 6653
-Recovery time cost for retrieve LSM-trees (unit: s):
-Average: 3442.00, Min: 3442, Max: 3442
-Recovery time cost for decode SSTables (unit: s):
-Average: 3211.00, Min: 3211, Max: 3211
-```
-
-* For Cassandra, the recovery time is the time cost of retrieving the SSTables from the replication only. The result will be output as in the example shown below.
-
-```shell
-[Exp info] scheme: cassandra, KVNumber: 6000000, KeySize: 24, ValueSize: 1000
-Total recovery time cost (unit: s):
-Only one round: 7515.00
-```
-
-#### Exp#5: Resource usage (1 human-minutes + ~ 5 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp5-resource.sh
-```
-
-*Results:* We summarize resource utilization as the 95th percentile of CPU usage, the 95th percentile of total memory overhead, total disk I/O, and total network overhead (bidirectional). In particular, we obtain the 95% percentile CPU usage based on the sum of the CPU usage of all nodes with the same timestamp and then calculate the average usage of each core (i.e., total usage/total number of cores). Therefore, the CPU usage results will be significantly affected by the differences in hardware configurations of different testbeds. The results will be output as in the example shown below.
-
-```
-[Resource usage with degraded operations] scheme: elect, KVNumber: 6000000, KeySize: 24, ValueSize: 1000, OPNumber: 600000
-95%-percentile CPU Usage (%):
-Only one round: 1.19
-95%-percentile RAM Usage (GiB):
-Only one round: 22.98
-Total Disk I/O (GiB):
-Only one round: 1.08
-Total Network traffic (GiB):
-Only one round: 202.38
-```
-
-#### Exp#6: Impact of key and value sizes (1 human-minutes + ~ 40 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp6-kvSize.sh
-```
-
-#### Exp#7: Impact of storage-saving target (1 human-minutes + ~ 45 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp7-balanceParam.sh
-```
-
-#### Exp#8: Impact of erasure coding parameters (1 human-minutes + ~ 12 compute-hours)
-
-The original experiment requires at least 12 nodes (1 client node, 10 server nodes, and 1 storage node). For the provided testbeds, limited by the number of available nodes, we adapt the changing range of erasure code K from 4~8 to 2~4. This result only verifies ELECT's adaptability to different K values.
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp8-ecParam.sh
-```
-
-### System setting analysis (Exp#9,10 in our paper)
-
-#### Exp#9: Impact of read consistency level (1 human-minutes + ~ 5 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp9-consistency.sh
-```
-
-#### Exp#10: Impact of number of clients (1 human minutes + ~ 5 compute-hours)
-
-*Running:*
-
-```shell
-bash scripts/exp/Exp10-clients.sh
-```
-
+We summarize resource utilization as the 95th percentile of CPU usage, the 95th percentile of total memory overhead, total disk I/O, and total network overhead (bidirectional). In particular, we obtain the 95% percentile CPU usage based on the sum of the CPU usage of all nodes with the same timestamp and then calculate the average usage of each core (i.e., total usage/total number of cores). Therefore, the CPU usage results will be significantly affected by the differences in hardware configurations of different testbeds. The results will be output as in the example shown below.

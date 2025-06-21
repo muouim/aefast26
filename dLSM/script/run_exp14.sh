@@ -3,11 +3,12 @@
 trap 'kill $(jobs -p)' SIGINT
 
 # Define the directory as a variable
-dm_tree_dir="$HOME/aefast26/ROLEX"
+dm_tree_dir="$HOME/aefast26/dLSM"
 ae_data_dir="$HOME/aefast26/AE/Data"
 
-workloads="ycsb-c insert-only update-only scan-only"
-threads="72 1 6 12 24 36 48 60"
+# Modified workloads to YCSB A-F
+workloads="ycsb-a ycsb-b ycsb-c ycsb-d ycsb-e ycsb-f"
+threads="72"
 distribution="zipfian uniform"
 node="6 5 4 2 1"
 memory_nodes="3"
@@ -27,34 +28,23 @@ if [ ! -d "$ae_data_dir" ]; then
     echo "Created directory $ae_data_dir"
 fi
 
-# Configure hugepages on compute and memory nodes
+# Configure hugepages on compute and memory nodes, dLSM does not use hugepage
 echo "---------- Configuring hugepages on compute and memory nodes ----------"
 for n in $memory_nodes; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=68768'; exit"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=0'; exit"
 done
 
 for n in $node; do
-    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=12768'; exit"
-    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+    ssh skv-node$n "/bin/bash -c 'sudo sysctl -w vm.nr_hugepages=0'; exit"
 done
-sudo sysctl -w vm.nr_hugepages=12768
-rm -f "$dm_tree_dir/build/load_keys.data"
+sudo sysctl -w vm.nr_hugepages=0
 
 for dis in $distribution; do
     for thread in $threads; do
         for file_name in $workloads; do
             echo "============================="
             echo "Starting run for $dis-$file_name with thread $thread"
-
-            # Clean up load_keys.data before scan-only workload
-            if [ "$file_name" = "scan-only" ]; then
-                echo "Cleaning load_keys.data on compute nodes"
-                for n in $node; do
-                    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
-                done
-                rm -f "$dm_tree_dir/build/load_keys.data"
-            fi
-
+            
             # Run script on memory nodes
             echo "Running server process on memory nodes"
             ssh skv-node3 "/bin/bash -c 'cd $dm_tree_dir/script && bash restart_memc.sh'; exit;"
@@ -66,12 +56,12 @@ for dis in $distribution; do
             for n in $node; do
                 sleep 2
                 echo "Running ycsbc on compute node $n"
-                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
+                ssh skv-node$n "cd $dm_tree_dir/build; nohup ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node$n-exp0_dlsm_$file_name-$dis-thread$thread-coro4.txt 2>&1 &"
             done
             
             sleep 2
             echo "Running ycsbc on compute node 7"
-            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt 2>&1;
+            cd $dm_tree_dir/build && ./ycsbc $thread 4 $file_name $dis > $dm_tree_dir/data/node7-exp0_dlsm_$file_name-$dis-thread$thread-coro4.txt 2>&1;
             echo "============================="
             
             # Run kill_server.sh script on memory nodes
@@ -84,10 +74,10 @@ for dis in $distribution; do
             for n in $node; do
                 echo "Copying data from node$n to node7's AE/Data directory"
                 # Use scp to copy data files from each compute node to node7's AE/Data directory
-                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+                scp "skv-node$n:$dm_tree_dir/data/node$n-exp0_dlsm_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             done
             echo "Copying local data from node7 to node7's AE/Data directory"
-            cp "$dm_tree_dir/data/node7-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
+            cp "$dm_tree_dir/data/node7-exp0_dlsm_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             echo "============================="
 
             echo "Finished $dis-$file_name with thread $thread"
@@ -98,6 +88,6 @@ for dis in $distribution; do
 done
 
 echo "============================="
-echo "All ROLEX tasks are finished"
-echo "All experiment results are saved in: $dm_tree_dir/data"
+echo "All dLSM tasks are finished"
+echo "All YCSB experiment results are saved in: $dm_tree_dir/data"
 echo "============================="

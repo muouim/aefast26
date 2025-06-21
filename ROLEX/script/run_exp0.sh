@@ -46,7 +46,7 @@ for dis in $distribution; do
             echo "============================="
             echo "Starting run for $dis-$file_name with thread $thread"
 
-            # Clean up load_keys.data before scan-only workload
+            # Use temporary file load_keys.data to cache loaded keys for training workloads
             if [ "$file_name" = "scan-only" ]; then
                 echo "Cleaning load_keys.data on compute nodes"
                 for n in $node; do
@@ -89,6 +89,15 @@ for dis in $distribution; do
             echo "Copying local data from node7 to node7's AE/Data directory"
             cp "$dm_tree_dir/data/node7-exp0_rolex_$file_name-$dis-thread$thread-coro4.txt" "$ae_data_dir/"
             echo "============================="
+
+            # Use temporary file load_keys.data to cache loaded keys for training workloads,
+            if [ "$file_name" = "scan-only" ]; then
+                echo "Cleaning load_keys.data on compute nodes"
+                for n in $node; do
+                    ssh skv-node$n "/bin/bash -c 'rm -f $dm_tree_dir/build/load_keys.data'; exit;"
+                done
+                rm -f "$dm_tree_dir/build/load_keys.data"
+            fi
 
             echo "Finished $dis-$file_name with thread $thread"
             wait
