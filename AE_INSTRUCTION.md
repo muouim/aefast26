@@ -179,15 +179,17 @@ chime,scan-only,2.718992,0.447759,0.455589,0.45241,0.453392,0.452061,0.457781
 
 The output experimental results correspond to those presented in Figures 11 and 12 of the original paper. To enable quick experimental verification, we only provide the bottleneck performance—**i.e., the performance of each baseline under each workload at the maximum thread count**—which corresponds to the **red-boxed data points in the figures** and has been converted into bar charts.
 
-As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
+As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.
+
+![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
 
 The experimental results in the file `simple_results_uniform.csv` are converted into bar charts, as shown in the figure.
 
-<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250621112713219.png" alt="image-20250621112713219" style="zoom: 25%;" />
+<img src=".\AE_INSTRUCTION.assets\image-20250621112713219.png" alt="image-20250621112713219" style="zoom: 25%;" />
 
 The experimental results in the file `simple_results_zipfian.csv` are converted into bar charts, as shown in the figure.
 
-<img src="D:\System\Adaption\AE\prepare\aefast26\AE_INSTRUCTION.assets\image-20250621112758392.png" alt="image-20250621112758392" style="zoom:25%;" />
+<img src=".\AE_INSTRUCTION.assets\image-20250621112758392.png" alt="image-20250621112758392" style="zoom:25%;" />
 
 我们可以看到，DMTree实现了总体的最优性能（除了Zipfian的更新负载下，比dLSM要差，这也符合预期）
 
