@@ -181,7 +181,7 @@ The output experimental results correspond to those presented in Figures 11 and 
 
 As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.
 
-![image-20250617173455219](.\AE_INSTRUCTION.assets\image-20250617173455219.png)
+<img src=".\AE_INSTRUCTION.assets\image-20250617173455219.png" alt="image-20250621112713219"  />
 
 The experimental results in the file `simple_results_uniform.csv` are converted into bar charts, as shown in the figure.
 
