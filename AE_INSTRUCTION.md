@@ -28,8 +28,6 @@ We evaluate and compare **DMTree** with five state-of-the-art DM-optimized range
 
 * We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
 
-
-
 ## Environment setup (~15 minutes)
 
 We provide scripts to set up the environment for the evaluation, including cloning the code repository and copying and compiling it across multiple cluster nodes. The scripts are tested on Ubuntu 20.04 LTS. 
@@ -71,11 +69,9 @@ To prevent repeated compilation and concurrent execution from disrupting the est
   rm /tmp/build_ae.flag
   ```
 
-
-
 ## Evaluations
 
-This section describes how to reproduce the major experiments in our paper. **We suggest running the scripts of 'Micro experiment' first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans))**.
+This section describes how to reproduce the major experiments in our paper. **We suggest running the scripts of 'Micro experiment' first, which can reproduce the main results of our paper while including most of the functionality verification** (i.e., DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans)).
 
 ### Micro experiment
 
@@ -100,7 +96,7 @@ nohup bash run_simple.sh >run_simple.output 2>&1 &
 This launches the experiment in the background and redirects the output to a log file, allowing you to safely close the terminal without interrupting the execution. 
 
 - You can monitor the execution progress in the `run_simple.output` file, which indicates the current baseline being tested. 
-- Once the script has completed all experiments, you will see the message`---------- All phases completed. ----------` at the end of the output file.
+- **Once the script has completed all experiments, you will see the message**`---------- All phases completed. ----------` **at the end of the output file**.
 
 The `run_simple.sh` script executes micro-benchmark experiments across all baseline systems and leverages Python scripts to structure and visualize the results for comparative analysis.
 
@@ -117,6 +113,12 @@ To prevent repeated experiments and concurrent execution from disrupting the run
   ```shell
   rm /tmp/simple_exp.flag
   ```
+
+**Note:** If you wish to release the cluster for use by others after completing the current experiment, **please run the command below to update the cluster's release status.**
+
+```shell
+bash unlock_cluster.sh
+```
 
 #### Exp#11-12: Result analysis
 
@@ -206,8 +208,6 @@ As shown in the original overall experiment figures, the red boxes highlight the
 
 <img src=".\AE_INSTRUCTION.assets\image-20250624205627370.png" alt="image-20250624205627370" style="zoom: 67%;" />
 
-
-
 ### YCSB experiment
 
 We provide this YCSB experiment to verify our overall results: **DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans) under various workloads.** Specifically, we preload 1 billion KV pairs and perform 100 million KV operations (including YCSB A/B/C/D/E/F).
@@ -252,3 +252,9 @@ To prevent repeated experiments and concurrent execution from disrupting the run
 ***Results:*** 
 
 The raw experimental results are stored in the `AE/Data` directory. The processed results are organized and written to the files `ycsb_results_uniform.csv` and `ycsb_results_zipfian.csv`. For visual comparison, we also generate bar charts saved as `ycsb_uniform.pdf` and `ycsb_zipfian.pdf`.
+
+**Note:** If you wish to release the cluster for use by others after completing the current experiment, **please run the command below to update the cluster's release status.**
+
+```shell
+bash unlock_cluster.sh
+```
