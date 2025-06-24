@@ -82,7 +82,6 @@ for project in $baselines; do
         proj_unit="minutes"
     fi
 
-    echo "$project's results are output to $output_path"
     echo "Time after $project: $current_time"
     echo " - Elapsed since script started: $elapsed $unit"
     echo " - Time for this project: $proj_elapsed $proj_unit"
@@ -110,4 +109,4 @@ else
     elapsed=$(echo "scale=2; $diff / 60" | bc)
     echo "Script completed at: $current_time, Total elapsed time: $elapsed minutes"
 fi
-echo "---------- All phases completed. YCSB Output saved to $output_path ----------"
+echo "---------- All phases completed. ----------"

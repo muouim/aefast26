@@ -78,10 +78,10 @@ def runtime(distribution):
     # Link inset and main axis
     mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="k", lw=1)
 
-    # Add grid and adjust layout
+    # Add grid and manually adjust layout to prevent overflow
     ax.grid(True, which='both', linestyle='--', color='gray', linewidth=0.5)
     ax.set_axisbelow(True)
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.15, right=0.98, top=0.88, bottom=0.15)
 
     # Save the figure to a file named by distribution
     pdf_name = f'ycsb_{distribution}.pdf'

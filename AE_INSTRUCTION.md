@@ -1,21 +1,34 @@
-# Instructions to reproduce the evaluations of the paper
+# DMTree Artifact
 
-Here are the detailed instructions to perform the same experiments in our paper.
-
-## Artifact claims
-
-We claim that the results might differ from those in our paper due to various factors (e.g., cluster sizes, machines, OS, software packages, etc.). Nevertheless, we expect DMTree to still achieve similar performance (in normal operations) with Cassandra while significantly reducing storage overhead (i.e., our main results). In addition, to reduce the influence of cloud storage location, hardware requirement, complexity, and running time of the evaluation, we made some changes to the evaluation configurations.
+This repository contains the artifact for the paper "**DMTree: Towards Efficient Tree Indexing on Disaggregated Memory via Compute-side Collaborative Design**", accepted at USENIX FAST'26.
 
 ## Artifact Overview
 
+This artifact allows reviewers to reproduce the main experimental results of the paper, including:
 
+-  DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans) under various workloads (e.g., Micro-benchmarks and YCSB workloads).
+
+We evaluate and compare **DMTree** with five state-of-the-art DM-optimized range indexes: **Sherman, ROLEX, SMART, dLSM, and CHIME**, all evaluated based on their open-source implementations.
+
+- [Sherman *(SIGMOD'22)*](https://github.com/thustorage/Sherman) is a DM-optimized B+-tree.
+- [ROLEX *(FAST'23)*](https://github.com/River861/ROLEX) is the latest learned index on DM.
+- [SMART *(OSDI'23)*](https://github.com/dmemsys/SMART) is the latest radix tree on DM.
+- [dLSM *(ICDE'23)*](https://github.com/ruihong123/dLSM) is the state-of-the-art DM-optimized LSM-tree.
+- [CHIME *(SOSP'24)*](https://github.com/dmemsys/CHIME) is a DM-optimized hybrid index that combines the B+ tree with hopscotch hashing.
 
 ## Cluster setup
 
-* We require **six compute nodes** and **one memory node** in AE.
-* We provide a server cluster consisting of 7 nodes (skv-node1 to skv-node7) for reproducing the experiments in our paper. One node, `skv-node7`, will be made available as the jump host for accessing the cluster and as the main node for running the reproduction scripts. The AEC can submit their SSH public key via the following document: XXX. Once we have added the key to the server, node7 can be accessed using the following command:`ssh -P 6672 aefast26@222.195.68.87`.
-* We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted a document-based reservation system along with an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
-* Additionally, to avoid excessive redundant testing, we will indicate which experiments have already been executed and have results available. It will be up to the AEC to decide whether to rerun those parts.
+* We provide a server cluster consisting of 7 nodes (skv-node1 to skv-node7) for reproducing the experiments in our paper. One node, `skv-node7`, will be made available as the jump host for accessing the cluster and as the main node for running the reproduction scripts. 
+
+* **The AEC may submit their SSH public key through a HotCRP comment.** After we have configured the key on our server, node7 will be accessible via the following command:
+
+  ```shell
+  ssh -P 6672 aefast26@222.195.68.87
+  ```
+
+* We sincerely apologize that, due to limited cluster resources, we are unable to provide each AEC with an independent execution environment. To prevent potential conflicts caused by concurrent usage, we have adopted an exclusive access notification mechanism in the following steps, ensuring that only one AEC can run experiments at any given time. 
+
+
 
 ## Environment setup (~15 minutes)
 
@@ -29,85 +42,87 @@ We provide scripts to set up the environment for the evaluation, including cloni
 git clone https://github.com/muouim/aefast26.git
 ```
 
-**Step 2:** Run the following script on `skv-node7`, including copying and compiling the code across multiple cluster nodes.
+**Step 2:** Ensure exclusive access to the cluster by running the locking script`lock_cluster.sh + reviewer ID `. This step prevents concurrent executions by other AECs and ensures consistent resource usage.
 
 ```shell
 cd aefast26
+bash lock_cluster.sh "reviewer A"
+```
+
+**Step 3:** Run the following script on `skv-node7`, including copying and compiling the code across multiple cluster nodes.
+
+```shell
 bash build_ae.sh
 ```
+
+In the `build_ae.sh` script, we copy the code to all nodes and perform node-specific configuration and compilation. This includes modifying memory-related parameters for some baselines on memory nodes (which require larger memory sizes) and adjusting compute node-specific settings for certain baselines (e.g., specifying the compute node ID in the test code for dLSM).
 
 To prevent repeated compilation and concurrent execution from disrupting the established environment, we have implemented a tracking and checking mechanism for the environment setup status when running the `build_ae.sh` script:
 
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
-- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
+
+- If the script is currently being executed, a message will prompt: ”`The script is already running, please wait.`“
+
 - If the script has already been executed, a message will prompt: "`Environment setup is complete, no need to run the script again.`"
-- If AEC want to re-run the environment setup (some unexpected issues or something went wrong), please run `rm /tmp/build_ae.flag` to reset the environment setup status.
+
+- If the AEC wishes to re-run the setup due to unexpected issues or configuration changes, the status can be reset by removing the flag file via:
+
+  ```shell
+  rm /tmp/build_ae.flag
+  ```
+
+
 
 ## Evaluations
 
-This section describes how to reproduce the evaluations in our paper. To simplify the reproduction process, we provide Ansible-based scripts to run all major experiments. The script will automatically run the experiments and generate the result logs. The scripts will take about 9~10 days to finish all the experiments.
+This section describes how to reproduce the major experiments in our paper. **We suggest running the scripts of 'Micro experiment' first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans))**.
 
-- **We suggest running the scripts of Exp#0 first, which can reproduce the main results of our paper while including most of the functionality verification (i.e., achieve controllable storage saving compared with Cassandra; provide similar performance of different types of KV operations such as read, write, scan, and update)**.
+### Micro experiment
 
-### Note on the experiment scripts
+#### Clean up memory
 
-These evaluation scripts require a long time to run. To avoid the interruption of the experiments, we suggest running the scripts in the background with `tmux`, `nohup`, `screen`, etc. In addition, please make sure that all scripts have been given execution permissions. You can do this according to the following example:
-
-```shell
-cd scripts
-find . -type f -name "*.sh" -exec chmod +x {} \;
-```
-
-### Note on the evaluation results
-
-The raw running log generated by the YCSB benchmark tool will be stored in the folder `${PathToELECTResultSummary}/` configured in the `scripts/settings.sh` file. The log file will be named with detailed configuration information, such as workload, KV number, operation number, etc.
-
-To make the result easier to read, we provide the summarized result of each evaluation in the `scripts/exp/` folder and named `${ExpName}.log`. For example, the result of Exp#1 will be stored in `scripts/exp/Exp1-ycsb.log`.
-
-For the **performance evaluation**, the result will be summarized in different ways according to the running round number of the experiment (defined in each of the experiment scripts by the variable `RunningRoundNumber`).
-
-* If the running round number is 1, the result will be directly output as in the example shown below.
+The `reset_memory.sh` script is used to clear the Linux page cache, ensuring sufficient available memory before running performance experiments. This helps eliminate memory pressure caused by residual cached data from previous runs.
 
 ```shell
-[Exp info] scheme: elect, workload: Write, KVNumber: 600000, OPNumber: 60000, KeySize: 24, ValueSize: 1000, ClientNumber: 16, ConsistencyLevel: ONE, ExtraFlag: 
-Throughput (unit: op/s): 
-Only one round: 9992.38
-[READ] Average operation latency (unit: us):
-Only one round: 1369.53
-[READ] 99th percentile latency (unit: us):
-Only one round: 1883.00
+bash reset_memory.sh
 ```
-
-For **other evaluations (i.e., Exp#3, 4, and 5)**, the result will be summarized similarly to the summarized performance results. Again, depending on the number of running rounds conducted, the output formats include options such as a single-round summary (run experiment with one round) or more comprehensive data sets featuring average, maximum, and minimum values (run experiment with 2~4 rounds), as well as average values with a 95% Student-T distribution confidence interval (run experiment more than five rounds). We provide examples of the summarized results of operation breakdown, recovery time cost, and resource usage in each related evaluation.
-
-### Micro experiment (For quick verification)
 
 #### Exp#11-12: Performance with Micro-benchmarks (~11 hours)
 
-We provide this simple experiment to verify our main experimental results quickly: **TODO: DMTree provides XXX...... similar performance compared to Cassandra while significantly reducing hot-tier storage overhead.** Specifically, we use 10M KV pairs and 1M KV operations (including read/write/update/scan, consistent with Exp2). This experiment will provide storage overhead (main results of Exp#1,2), performance of normal and degraded operations (main results of Exp#2), KV operation breakdown (main results of Exp#3), recovery time overhead when a single node fails (main results of Exp#4), and average resource utilization under load/normal/degraded conditions (main results of Exp#5). The summarized results will be printed on the screen after the evaluation and saved in the `scripts/exp/Exp0-simpleOverall.log` file.
+We provide this simple experiment to verify our main experimental results quickly: **DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans).** Specifically, we preload 1 billion KV pairs and perform 100 million KV operations (including search/insert/update/scan).
 
 You can run this simple experiment via the following command:
-
-```shell
-bash run_simple.sh
-```
-
-Alternatively, you may consider running it in the background to avoid keeping the terminal window open for an extended period.
 
 ```shell
 nohup bash run_simple.sh >run_simple.output 2>&1 &
 ```
 
+This launches the experiment in the background and redirects the output to a log file, allowing you to safely close the terminal without interrupting the execution. 
+
+- You can monitor the execution progress in the `run_simple.output` file, which indicates the current baseline being tested. 
+- Once the script has completed all experiments, you will see the message`---------- All phases completed. ----------` at the end of the output file.
+
+The `run_simple.sh` script executes micro-benchmark experiments across all baseline systems and leverages Python scripts to structure and visualize the results for comparative analysis.
+
 To prevent repeated experiments and concurrent execution from disrupting the running experiments, we have implemented a tracking and checking mechanism for the simple experiment status when running the `run_simple.sh` script:
 
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
-- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
+
+- If the script is currently being executed, a message will prompt: ”`The script is already running, please wait.`“
+
 - If the script has already been executed, a message will prompt: "`Simple experiment is complete, no need to run the script again.`".
-- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/simple_exp.flag` to reset the simple experiment status.
 
-The results will be output in the file `simple_results_uniform.csv` and `simple_results_zipfian.csv`. 并且，我们绘制了柱状图`ycsb_uniform.pdf`和`ycsb_zipfian.pdf`.
+- If the AEC wishes to re-run the simple experiment due to unexpected results or issues, the status can be reset by removing the flag file with:
 
-Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
+  ```shell
+  rm /tmp/simple_exp.flag
+  ```
+
+#### Exp#11-12: Result analysis
+
+The raw experimental results are stored in the `AE/Data` directory. The processed results are organized and written to the files `simple_results_uniform.csv` and `simple_results_zipfian.csv`. For visual comparison, we also generate bar charts saved as `simple_uniform.pdf` and `simple_zipfian.pdf`.
+
+As shown below, we present the processed results and corresponding plots generated by the test script.
 
 **simple_results_uniform.csv**
 
@@ -177,51 +192,63 @@ chime,update-only,18.59494,3.1023,3.0827,3.09694,3.09088,3.1103,3.11182
 chime,scan-only,2.718992,0.447759,0.455589,0.45241,0.453392,0.452061,0.457781
 ```
 
-The output experimental results correspond to those presented in Figures 11 and 12 of the original paper. To enable quick experimental verification, we only provide the bottleneck performance—**i.e., the performance of each baseline under each workload at the maximum thread count**—which corresponds to the **red-boxed data points in the figures** and has been converted into bar charts.
+The experimental results in `simple_results_uniform.csv` are visualized as bar charts, as shown in the figure `simple_uniform.pdf`.
 
-As shown in the original overall experiment figures, the red boxes highlight the data produced by the simple experiment, representing the performance of each baseline under each workload at the maximum thread count.
+<img src=".\AE_INSTRUCTION.assets\image-20250624203054068.png" alt="image-20250624203054068" style="zoom:33%;" />
 
-<img src=".\AE_INSTRUCTION.assets\image-20250617173455219.png" alt="image-20250621112713219"  />
+The experimental results in `simple_results_zipfian.csv` are visualized as bar charts, as shown in the figure `simple_zipfian.pdf`.
 
-The experimental results in the file `simple_results_uniform.csv` are converted into bar charts, as shown in the figure.
+<img src=".\AE_INSTRUCTION.assets\image-20250624203359124.png" alt="image-20250624203359124" style="zoom:33%;" />
 
-<img src=".\AE_INSTRUCTION.assets\image-20250621112713219.png" alt="image-20250621112713219" style="zoom: 25%;" />
+The output experimental results correspond to those presented in **Figures 11 and 12** of the original paper. To enable quick experimental verification, we only provide the bottleneck performance—**i.e., the performance of each baseline under each workload at the maximum thread count**.
 
-The experimental results in the file `simple_results_zipfian.csv` are converted into bar charts, as shown in the figure.
+As shown in the original overall experiment figures, the red boxes highlight the data produced by the Micro experiment, representing the performance of each baseline under each workload at the maximum thread count.
 
-<img src=".\AE_INSTRUCTION.assets\image-20250621112758392.png" alt="image-20250621112758392" style="zoom:25%;" />
-
-我们可以看到，DMTree实现了总体的最优性能（除了Zipfian的更新负载下，比dLSM要差，这也符合预期）
+<img src=".\AE_INSTRUCTION.assets\image-20250624205627370.png" alt="image-20250624205627370" style="zoom: 67%;" />
 
 
 
-### YCSB experiment (Exp#14 in our paper)
+### YCSB experiment
 
-#### Exp#14: Performance with YCSB core workloads (-20 hours)
+We provide this YCSB experiment to verify our overall results: **DMTree outperforms existing state-of-the-art range indexes on DM for both point operations (i.e., searches, inserts, and updates) and range operations (i.e., scans) under various workloads.** Specifically, we preload 1 billion KV pairs and perform 100 million KV operations (including YCSB A/B/C/D/E/F).
+
+#### Clean up memory
+
+The `reset_memory.sh` script is used to clear the Linux page cache, ensuring sufficient available memory before running performance experiments. This helps eliminate memory pressure caused by residual cached data from previous runs.
+
+```shell
+bash reset_memory.sh
+```
+
+#### Exp#14: Performance with YCSB core workloads (-15 hours)
 
 ***Running:***
 
-You can run this simple experiment via the following command:
-
-```shell
-bash run_ycsb.sh
-```
-
-Alternatively, you may consider running it in the background to avoid keeping the terminal window open for an extended period.
+You can run this ycsb experiment via the following command:
 
 ```shell
 nohup bash run_ycsb.sh >run_ycsb.output 2>&1 &
 ```
 
+This launches the experiment in the background and redirects the output to a log file, allowing you to safely close the terminal without interrupting the execution. 
+
+- You can monitor the execution progress in the `run_ycsb.output` file, which indicates the current baseline being tested. 
+- Once the script has completed all experiments, you will see the message`---------- All phases completed. ----------` at the end of the output file.
+
 To prevent repeated experiments and concurrent execution from disrupting the running experiments, we have implemented a tracking and checking mechanism for the simple experiment status when running the `run_ycsb.sh` script:
 
 - If the script has not been executed before and the code has not been copied or compiled, the script will be executed.
-- If the script is currently being executed by another AEC, a message will prompt: ”`The script is already running, please wait.`“
+
+- If the script is currently being executed, a message will prompt: ”`The script is already running, please wait.`“
+
 - If the script has already been executed, a message will prompt: "`YCSB experiment is complete, no need to run the script again.`".
-- If AEC want to re-run the simple experiment (some unexpected results or something wrong), please run `rm /tmp/ycsb_exp.flag` to reset the simple experiment status.
+
+- If the AEC wishes to re-run the YCSB experiment due to unexpected results or other issues, the status can be reset by removing the flag file using:
+
+  ```shell
+  rm /tmp/ycsb_exp.flag
+  ```
 
 ***Results:*** 
 
-The results will be output in the file `ycsb_results_uniform.csv` and `ycsb_results_zipfian.csv`. Here, we only show the title line and output sequence of each part. The specific result format of each part is as shown in the "Note on the evaluation results" above and the example of each specific experiment below.
-
-We summarize resource utilization as the 95th percentile of CPU usage, the 95th percentile of total memory overhead, total disk I/O, and total network overhead (bidirectional). In particular, we obtain the 95% percentile CPU usage based on the sum of the CPU usage of all nodes with the same timestamp and then calculate the average usage of each core (i.e., total usage/total number of cores). Therefore, the CPU usage results will be significantly affected by the differences in hardware configurations of different testbeds. The results will be output as in the example shown below.
+The raw experimental results are stored in the `AE/Data` directory. The processed results are organized and written to the files `ycsb_results_uniform.csv` and `ycsb_results_zipfian.csv`. For visual comparison, we also generate bar charts saved as `ycsb_uniform.pdf` and `ycsb_zipfian.pdf`.

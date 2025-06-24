@@ -15,7 +15,7 @@ def runtime(distribution):
     # Define the baseline order and workloads to plot
     baselines = ["sherman", "dlsm", "rolex", "smart", "chime", "dmtree"]
     workloads = ["ycsb-c", "insert-only", "update-only", "scan-only"]
-    workload_labels = ['Read', 'Insert', 'Update', 'Scan']
+    workload_labels = ['Search', 'Insert', 'Update', 'Scan']
 
     bar_colors = ['#1D3557', '#FABB6E', '#457B9D', '#A8DADB', '#497D74', '#E73847']
     hatchs = ['xxx','|||', '---', '\\\\\\', '///', '***']
@@ -81,10 +81,12 @@ def runtime(distribution):
     # Add grid and adjust layout
     ax.grid(True, which='both', linestyle='--', color='gray', linewidth=0.5)
     ax.set_axisbelow(True)
-    plt.tight_layout()
+
+    # Manually adjust layout to prevent label and content overflow
+    fig.subplots_adjust(left=0.15, right=0.98, top=0.88, bottom=0.15)
 
     # Save the figure to a file named by distribution
-    pdf_name = f'ycsb_{distribution}.pdf'
+    pdf_name = f'simple_{distribution}.pdf'
     plt.savefig(pdf_name)
     print(f"[✓] Saved plot to {pdf_name}")
     # plt.show()
