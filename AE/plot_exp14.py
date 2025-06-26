@@ -55,7 +55,7 @@ def runtime(distribution):
 
     # Create an inset axis for zooming into the 'ycsb-e' workload
     axins = inset_axes(ax, width="15%", height="20%", loc='lower left',
-                       bbox_to_anchor=(0.78, 0.4, 1, 1),
+                       bbox_to_anchor=(0.68, 0.4, 1, 1),
                        bbox_transform=ax.transAxes)
 
     # Draw bars for the inset (ycsb-e)

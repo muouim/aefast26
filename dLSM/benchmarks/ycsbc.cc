@@ -722,7 +722,7 @@ int main(const int argc, const char *argv[])
     // rdma_mg->sync_with_computes_Cside();
     // The waiting time here is not included in the performance statistics.
     // This ensures that no node exits prematurely, which could disrupt the subsequent steps of the script.
-    slee(30);
+    sleep(30);
 	cout << "----------------------------" << endl;
     cout << "Number of Thread: " << num_threads << endl;
 

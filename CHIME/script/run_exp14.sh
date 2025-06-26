@@ -9,7 +9,7 @@ ae_data_dir="$HOME/aefast26/AE/Data"
 # Updated workloads: ycsb-a ~ ycsb-f
 workloads="ycsb-a ycsb-b ycsb-c ycsb-d ycsb-e ycsb-f"
 threads="72"
-distribution="zipfian uniform"
+distribution="zipfian"
 node="6 5 4 2 1"
 memory_nodes="3"
 
