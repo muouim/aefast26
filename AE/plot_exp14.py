@@ -51,7 +51,7 @@ def runtime(distribution):
     # Add legend with baseline names
     handles = [bars[b][0] for b in baselines]
     labels = [b for b in baselines]
-    ax.legend(handles, labels, loc='upper right', ncol=3, fontsize=10, frameon=False)
+    ax.legend(handles, labels, loc='upper right', ncol=3, fontsize=10, handlelength=1, handletextpad=0.5, columnspacing=1, frameon=False)
 
     # Create an inset axis for zooming into the 'ycsb-e' workload
     axins = inset_axes(ax, width="15%", height="20%", loc='lower left',

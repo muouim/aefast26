@@ -27,7 +27,7 @@ The packages can be directly installed via `apt-get` and `pip` package managers:
 
 ## Environment setup
 
-To build the ELECT prototype and YCSB benchmark, simply run the following commands:
+To build the DMTree prototype and YCSB benchmark, simply run the following commands:
 
 ```shell
 cd DMTree
