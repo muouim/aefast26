@@ -25,7 +25,7 @@ These dependencies can be installed via `apt-get`, `pip`, or built and installed
 `g++`，`cmake`，`libssl`，`snappy`，`memcached`，`boost`，`city-hash`, `matplotlib`
 ```
 
-## Environment setup
+## Environment setup for DMTree
 
 ### Cluster configuration
 
@@ -44,6 +44,7 @@ These dependencies can be installed via `apt-get`, `pip`, or built and installed
 To build the DMTree prototype and the YCSB benchmark, run:
 
 ```shell
+cd DMTree
 mkdir -p build && cd build
 cmake ..
 make -j
