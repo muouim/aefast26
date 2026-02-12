@@ -19,19 +19,34 @@ Please refer to the [AE_INSTRUCTION.md](AE_INSTRUCTION.md) for details.
 * The toolkit is running under Linux (e.g., Ubuntu 20.04) with a C++ compiler (e.g., g++). 
 * Install Mellanox OFED-5.X.
 
-The packages can be directly installed via `apt-get` and `pip` package managers:
+These dependencies can be installed via `apt-get`, `pip`, or built and installed from source (e.g., github releases / source archives):
 
 ```shell 
-`g++`，`cmake`，`libssl`，`snappy`，`memcached`，`boost`，`city-hash`
+`g++`，`cmake`，`libssl`，`snappy`，`memcached`，`boost`，`city-hash`, `matplotlib`
 ```
 
 ## Environment setup
 
-To build the DMTree prototype and YCSB benchmark, simply run the following commands:
+### Cluster configuration
+
+- Specify the memcached server used to exchange RDMA connection metadata (e.g., `rkey`) in `memcached.conf`.
+
+- Specify the cluster size (total nodes, compute nodes, and memory nodes) in `test/ycsb.cc` and `test/server.cc`:
+
+  ```c++
+  int kNodeCount = X;
+  int kComputeNodeCount = X;
+  int kMemoryNodeCount = X;
+  ```
+
+### Build from source
+
+To build the DMTree prototype and the YCSB benchmark, run:
 
 ```shell
-cd DMTree
-mkdir build && cd build && cmake .. && make -j
+mkdir -p build && cd build
+cmake ..
+make -j
 ```
 
 ## Running 
@@ -43,12 +58,12 @@ To test the DMTree prototype, we need to run the following steps:
 
 We describe the detailed steps below.
 
-### Run the DMTree server on memory nodes.
+### Run the DMTree server on memory nodes
 
 On each memory node, launch the DMTree server with the following commands:
 
 ```shell
-cd DMTree/build
+cd build
 ./server
 ```
 
@@ -57,7 +72,7 @@ cd DMTree/build
 After the server has been started on the memory nodes, execute the benchmark on each compute node using:
 
 ```shell
-cd DMTree/build
+cd build
 ./ycsbc 72 4 ycsb-c zipfian
 ```
 
@@ -65,3 +80,4 @@ cd DMTree/build
 - `4`: number of coroutines per thread
 - `ycsb-c`: workload type
 - `zipfian`: workload distribution (can also use `uniform`)
+
